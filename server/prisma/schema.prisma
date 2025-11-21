@@ -1,0 +1,342 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String    @id @default(uuid())
+  cpf             String    @unique
+  email           String    @unique
+  phone           String?
+  password_hash   String
+  full_name       String
+  sex             String?   // M, F, O
+  birth_date      DateTime?
+  nationality     String?
+  place_of_birth  String?
+  photo_url       String?
+  rf_status       String    @default("PENDING") // VALID, INVALID, PENDING
+  role            String    @default("USER") // ADMIN, USER, ENTITY, STAFF
+  is_obfuscated   Boolean   @default(false)
+  two_factor_secret String?
+  city            String?
+  state           String?
+  privacy_level   String    @default("PRIVATE") // PUBLIC, PRIVATE
+  is_active       Boolean   @default(true)
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+
+  audit_logs      AuditLog[]
+  organizations   Organization[]
+  match_events    MatchEvent[]
+  documents       Document[]
+  
+  athlete_inscriptions AthleteInscription[]
+  referee              Referee?
+  athlete_profile      AthleteProfile?
+  bookings             Booking[]
+}
+
+model AthleteProfile {
+  id            Int      @id @default(autoincrement())
+  user_id       String   @unique
+  user          User     @relation(fields: [user_id], references: [id])
+  document_url  String
+  photo_url     String
+  status        String   @default("PENDING") // PENDING, VALID, REJECTED
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+}
+
+model Document {
+  id        Int      @id @default(autoincrement())
+  user_id   String
+  user      User     @relation(fields: [user_id], references: [id])
+  type      String   // PHOTO, ID, VOTER
+  url       String
+  status    String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  created_at DateTime @default(now())
+}
+
+model Modality {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+  competitions Competition[]
+  venues       Venue[]
+}
+
+model AuditLog {
+  id         Int      @id @default(autoincrement())
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [id])
+  action     String
+  ip_address String
+  timestamp  DateTime @default(now())
+}
+
+model Organization {
+  id              Int    @id @default(autoincrement())
+  name_official   String
+  cnpj            String @unique
+  manager_user_id String
+  manager         User   @relation(fields: [manager_user_id], references: [id])
+  teams           Team[]
+}
+
+model Championship {
+  id         Int      @id @default(autoincrement())
+  name       String
+  status     String   @default("OPEN") // OPEN, ACTIVE, FINISHED
+  type       String   // LEAGUE, OPEN_GAMES
+  teams      Team[]
+}
+
+model Team {
+  id              Int          @id @default(autoincrement())
+  organization_id Int
+  organization    Organization @relation(fields: [organization_id], references: [id])
+  championship_id Int
+  championship    Championship @relation(fields: [championship_id], references: [id])
+  category        String
+  
+  home_matches    Match[]      @relation("HomeTeam")
+  away_matches    Match[]      @relation("AwayTeam")
+  
+  registrations   TeamRegistration[]
+  matches_as_team_a GameMatch[] @relation("TeamAMatches")
+  matches_as_team_b GameMatch[] @relation("TeamBMatches")
+}
+
+model Match {
+  id            Int      @id @default(autoincrement())
+  home_team_id  Int
+  home_team     Team     @relation("HomeTeam", fields: [home_team_id], references: [id])
+  away_team_id  Int
+  away_team     Team     @relation("AwayTeam", fields: [away_team_id], references: [id])
+  start_time    DateTime
+  home_score    Int      @default(0)
+  away_score    Int      @default(0)
+  status        String   @default("SCHEDULED") // SCHEDULED, LIVE, ENDED
+  s3_sumula_url String?
+  
+  events        MatchEvent[]
+}
+
+model MatchEvent {
+  id             Int    @id @default(autoincrement())
+  match_id       Int
+  match          Match  @relation(fields: [match_id], references: [id])
+  player_user_id String
+  player         User   @relation(fields: [player_user_id], references: [id])
+  event_type     String // GOAL, YELLOW, RED, SUB
+  minute         Int
+}
+
+// --- Competition Management ---
+
+model Competition {
+  id            Int      @id @default(autoincrement())
+  name          String
+  nickname      String?
+  start_date    DateTime?
+  end_date      DateTime?
+  modality_id   Int
+  modality      Modality @relation(fields: [modality_id], references: [id])
+  gender        String   // MALE, FEMALE, MIXED
+  status        String   @default("DRAFT") // DRAFT, OPEN_FOR_REGISTRATION, ACTIVE, FINISHED
+  is_public     Boolean  @default(false)
+  
+  // New fields for enhanced competition management
+  regulation_pdf_url String?   // URL to regulation PDF
+  competition_type   String    @default("ROUND_ROBIN") // ROUND_ROBIN, SINGLE_ELIMINATION, DOUBLE_ELIMINATION, SWISS, GROUPS_KNOCKOUT
+  
+  min_athletes  Int?
+  max_athletes  Int?
+  min_age       Int?
+  max_age       Int?
+  
+  phases        Phase[]
+  registrations TeamRegistration[]
+  matches       GameMatch[]
+  venues        CompetitionVenue[]
+  
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+}
+
+// Enhanced Phase model
+model Phase {
+  id                     Int      @id @default(autoincrement())
+  competition_id         Int
+  competition            Competition @relation(fields: [competition_id], references: [id])
+  name                   String
+  type                   String   // GROUP, ELIMINATION, ROUND_ROBIN
+  order                  Int
+  
+  // New scheduling fields
+  start_date             DateTime?
+  end_date               DateTime?
+  matches_per_day        Int?     @default(3)
+  match_duration_minutes Int?     @default(90)
+  rest_time_minutes      Int?     @default(30)
+  
+  groups                 Group[]
+  matches                GameMatch[]
+}
+
+model Group {
+  id             Int      @id @default(autoincrement())
+  phase_id       Int
+  phase          Phase    @relation(fields: [phase_id], references: [id])
+  name           String
+  teams_count    Int      @default(0)
+  
+  team_registrations TeamRegistration[]
+  matches        GameMatch[]
+}
+
+model TeamRegistration {
+  id              Int         @id @default(autoincrement())
+  competition_id  Int
+  competition     Competition @relation(fields: [competition_id], references: [id])
+  group_id        Int?
+  group           Group?      @relation(fields: [group_id], references: [id])
+  team            Team        @relation(fields: [team_id], references: [id])
+  team_id         Int
+  status          String      @default("PENDING") // PENDING, CONFIRMED, REJECTED, APPROVED
+  
+  athletes        AthleteInscription[]
+  created_at      DateTime    @default(now())
+}
+
+// NEW: Game Match Model for Competition Management
+model GameMatch {
+  id              Int         @id @default(autoincrement())
+  competition_id  Int
+  competition     Competition @relation(fields: [competition_id], references: [id])
+  phase_id        Int
+  phase           Phase       @relation(fields: [phase_id], references: [id])
+  group_id        Int?
+  group           Group?      @relation(fields: [group_id], references: [id])
+  
+  round_number    Int         // Round/Rodada number
+  match_number    Int         // Match number within round
+  
+  team_a_id       Int?
+  team_a          Team?       @relation("TeamAMatches", fields: [team_a_id], references: [id])
+  team_b_id       Int?
+  team_b          Team?       @relation("TeamBMatches", fields: [team_b_id], references: [id])
+  
+  scheduled_date  DateTime?
+  venue_id        Int?
+  venue           Venue?      @relation(fields: [venue_id], references: [id])
+  
+  score_a         Int?        @default(0)
+  score_b         Int?        @default(0)
+  status          String      @default("PENDING") // PENDING, SCHEDULED, LIVE, FINISHED, CANCELLED
+  
+  created_at      DateTime    @default(now())
+  updated_at      DateTime    @updatedAt
+}
+
+// NEW: Competition Venue Assignment
+model CompetitionVenue {
+  id              Int         @id @default(autoincrement())
+  competition_id  Int
+  competition     Competition @relation(fields: [competition_id], references: [id])
+  venue_id        Int
+  venue           Venue       @relation(fields: [venue_id], references: [id])
+  
+  is_primary      Boolean     @default(false)
+  priority        Int         @default(0) // Higher = used more frequently in random assignment
+  
+  created_at      DateTime    @default(now())
+}
+
+// Sports Structures & Reservations
+model Venue {
+  id          Int      @id @default(autoincrement())
+  name        String
+  nickname    String?
+  type        String   // FIELD, GYM, POOL, COURT, COMPLEX, TRACK, OTHER
+  inauguration_date DateTime?
+
+  // Location
+  zip_code    String?
+  country     String?
+  state       String?
+  city        String?
+  neighborhood String?
+  address     String?
+  number      String?
+  complement  String?
+  latitude    Float?
+  longitude   Float?
+
+  // Contact & Info
+  phone       String?
+  pix_key     String?
+  owner_entity String? // Club, Association, Municipality
+  
+  // Specs
+  capacity    Int?
+  has_accessibility Boolean @default(false)
+  description String?
+
+  // Configuration for Reservations
+  price_per_hour Float?
+  min_advance_hours Int @default(1)
+  max_future_days   Int @default(30)
+  max_active_bookings_per_user Int @default(3)
+  opening_hours     String? // JSON string storing schedule: { "mon": ["08:00-22:00"], ... }
+
+  modalities  Modality[]
+  bookings    Booking[]
+  matches     GameMatch[]
+  competition_venues CompetitionVenue[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Booking {
+  id          Int      @id @default(autoincrement())
+  start_time  DateTime
+  end_time    DateTime
+  status      String   // PENDING, CONFIRMED, CANCELED, COMPLETED
+  total_price Float
+  
+  user_id     String
+  user        User     @relation(fields: [user_id], references: [id])
+  
+  venue_id    Int
+  venue       Venue    @relation(fields: [venue_id], references: [id])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AthleteInscription {
+  id                   Int              @id @default(autoincrement())
+  team_registration_id Int
+  team_registration    TeamRegistration @relation(fields: [team_registration_id], references: [id])
+  user_id              String
+  user                 User             @relation(fields: [user_id], references: [id])
+  status               String           @default("VALID") // VALID, PENDING_DOCS, SUSPENDED
+}
+
+model Referee {
+  id             Int      @id @default(autoincrement())
+  user_id        String   @unique
+  user           User     @relation(fields: [user_id], references: [id])
+  category       String?
+  pix_key        String?
+  functions      String?  // JSON array of allowed functions
+  card_valid_until DateTime?
+}
