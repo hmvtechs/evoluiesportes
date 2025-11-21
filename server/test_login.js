@@ -1,4 +1,5 @@
 const http = require('http');
+const fs = require('fs');
 
 const data = JSON.stringify({
     identifier: 'user1@example.com',
@@ -18,9 +19,15 @@ const options = {
 
 const req = http.request(options, res => {
     console.log(`statusCode: ${res.statusCode}`);
+    let body = '';
 
     res.on('data', d => {
-        process.stdout.write(d);
+        body += d;
+    });
+
+    res.on('end', () => {
+        fs.writeFileSync('login_error.txt', body);
+        console.log('Response written to login_error.txt');
     });
 });
 
