@@ -1,6 +1,0 @@
-Servidor:  UnKnown
-Address:  192.168.1.1
-
-Nome:    db.deqtlplceaphtindxxtu.supabase.co
-Address:  2600:1f16:1cd0:3333:c38:8e1b:f90c:a02f
-

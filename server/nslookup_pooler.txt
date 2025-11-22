@@ -1,9 +1,0 @@
-Servidor:  UnKnown
-Address:  192.168.1.1
-
-Nome:    pool-tcp-sa-east-1-f58b33d-febe8ff3c9b84a53.elb.sa-east-1.amazonaws.com
-Addresses:  15.229.150.166
-	  54.94.90.106
-	  52.67.1.88
-Aliases:  aws-0-sa-east-1.pooler.supabase.com
-

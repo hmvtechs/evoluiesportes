@@ -101,6 +101,51 @@ export const getUsers = async (req: Request, res: Response) => {
 };
 
 /**
+ * Search users by CPF or name
+ */
+export const searchUsers = async (req: Request, res: Response) => {
+    const { query } = req.query;
+
+    if (!query || typeof query !== 'string') {
+        return res.status(400).json({ error: 'Query parameter is required' });
+    }
+
+    console.log('\n=== SEARCHING USERS ===');
+    console.log('Query:', query);
+
+    try {
+        // Clean CPF (remove non-digits)
+        const cleanedQuery = query.replace(/\D/g, '');
+
+        // Search by CPF (if query contains only digits) or by name
+        const users = await prisma.user.findMany({
+            where: {
+                OR: [
+                    { cpf: { contains: cleanedQuery } },
+                    { full_name: { contains: query, mode: 'insensitive' } }
+                ]
+            },
+            select: {
+                id: true,
+                full_name: true,
+                cpf: true,
+                email: true,
+                birth_date: true,
+                photo_url: true,
+                role: true
+            },
+            take: 10 // Limit results
+        });
+
+        console.log(`✅ Found ${users.length} users matching query`);
+        res.json(users);
+    } catch (error: any) {
+        console.error('❌ Error searching users:', error.message);
+        res.status(500).json({ error: 'Erro ao buscar usuários' });
+    }
+};
+
+/**
  * ADMIN: Update user fields
  */
 export const updateAdminUser = async (req: Request, res: Response) => {

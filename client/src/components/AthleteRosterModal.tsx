@@ -36,12 +36,6 @@ const AthleteRosterModal: React.FC<AthleteRosterModalProps> = ({ teamRegistratio
         fetchAthletes();
     }, []);
 
-    useEffect(() => {
-        if (activeTab === 'add') {
-            fetchAvailableUsers();
-        }
-    }, [activeTab]);
-
     const fetchAthletes = async () => {
         setLoading(true);
         try {
@@ -59,19 +53,29 @@ const AthleteRosterModal: React.FC<AthleteRosterModalProps> = ({ teamRegistratio
         }
     };
 
-    const fetchAvailableUsers = async () => {
-        try {
-            const response = await fetch('http://localhost:3000/api/v1/users', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setAvailableUsers(data);
-            }
-        } catch (error) {
-            console.error('Failed to fetch users', error);
+    // Debounced search function
+    useEffect(() => {
+        if (activeTab !== 'add' || searchTerm.length < 2) {
+            setAvailableUsers([]);
+            return;
         }
-    };
+
+        const timeoutId = setTimeout(async () => {
+            try {
+                const response = await fetch(`http://localhost:3000/api/v1/users/search?query=${encodeURIComponent(searchTerm)}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    setAvailableUsers(data);
+                }
+            } catch (error) {
+                console.error('Failed to search users', error);
+            }
+        }, 300); // 300ms debounce
+
+        return () => clearTimeout(timeoutId);
+    }, [searchTerm, activeTab, token]);
 
     const handleAddAthlete = async () => {
         if (!selectedUserId) {
@@ -297,7 +301,7 @@ const AthleteRosterModal: React.FC<AthleteRosterModalProps> = ({ teamRegistratio
                                 />
                                 <input
                                     type="text"
-                                    placeholder="Buscar por nome ou CPF..."
+                                    placeholder="Digite nome ou CPF para buscar (mín. 2 caracteres)..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                     style={{
@@ -322,7 +326,9 @@ const AthleteRosterModal: React.FC<AthleteRosterModalProps> = ({ teamRegistratio
                             >
                                 {filteredUsers.length === 0 ? (
                                     <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                                        Nenhum usuário encontrado
+                                        {searchTerm.length < 2
+                                            ? 'Digite pelo menos 2 caracteres para buscar atletas por nome ou CPF'
+                                            : 'Nenhum usuário encontrado com este critério de busca'}
                                     </div>
                                 ) : (
                                     filteredUsers.map(user => (
