@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from '../config/api';
 import { useNavigate } from 'react-router-dom';
 import { MapPin, Calendar, Plus, Edit, Trash } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -19,13 +20,9 @@ const VenueList: React.FC = () => {
     const [venues, setVenues] = useState<Venue[]>([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        fetchVenues();
-    }, []);
-
     const fetchVenues = async () => {
         try {
-            const response = await fetch('http://localhost:3000/api/v1/venues');
+            const response = await fetch(`${API_BASE_URL}/api/v1/venues`);
             const data = await response.json();
             setVenues(data);
         } catch (error) {
@@ -38,15 +35,19 @@ const VenueList: React.FC = () => {
     const handleDelete = async (id: number) => {
         if (!confirm('Tem certeza que deseja excluir este local?')) return;
         try {
-            await fetch(`http://localhost:3000/api/v1/venues/${id}`, {
+            await fetch(`${API_BASE_URL}/api/v1/venues/${id}`, {
                 method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: { Authorization: `Bearer ${token}` },
             });
             fetchVenues();
         } catch (error) {
             alert('Erro ao excluir local');
         }
     };
+
+    useEffect(() => {
+        fetchVenues();
+    }, []);
 
     return (
         <div className="animate-fade-in">
@@ -66,7 +67,7 @@ const VenueList: React.FC = () => {
                 <p>Carregando...</p>
             ) : (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
-                    {venues.map(venue => (
+                    {venues.map((venue) => (
                         <div key={venue.id} className="card hover-scale">
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                 <div>
@@ -75,18 +76,20 @@ const VenueList: React.FC = () => {
                                 </div>
                                 {user?.role === 'ADMIN' && (
                                     <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                        <button className="btn-icon" onClick={() => navigate(`/venues/${venue.id}/edit`)}><Edit size={16} /></button>
-                                        <button className="btn-icon" onClick={() => handleDelete(venue.id)}><Trash size={16} /></button>
+                                        <button className="btn-icon" onClick={() => navigate(`/venues/${venue.id}/edit`)}>
+                                            <Edit size={16} />
+                                        </button>
+                                        <button className="btn-icon" onClick={() => handleDelete(venue.id)}>
+                                            <Trash size={16} />
+                                        </button>
                                     </div>
                                 )}
                             </div>
-
                             <div style={{ marginTop: '1rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
                                 <p>{venue.neighborhood}, {venue.city}</p>
                                 <p>Capacidade: {venue.capacity || 'N/A'} pessoas</p>
                                 <p>Preço: {venue.price_per_hour ? `R$ ${venue.price_per_hour}/h` : 'Grátis'}</p>
                             </div>
-
                             <div style={{ marginTop: '1.5rem' }}>
                                 <button className="btn btn-outline" style={{ width: '100%' }} onClick={() => navigate(`/venues/${venue.id}/book`)}>
                                     <Calendar size={16} /> Ver Disponibilidade

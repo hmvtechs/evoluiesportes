@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Users, Trophy, AlertCircle, Activity } from 'lucide-react';
+import { API_BASE_URL } from '../config/api';
 
 interface DashboardStats {
     registrationsToday: number;
@@ -17,7 +18,7 @@ const Dashboard: React.FC = () => {
         const fetchDashboard = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch('http://localhost:3000/api/v1/users/dashboard', {
+                const response = await fetch(`${API_BASE_URL}/api/v1/users/dashboard`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }

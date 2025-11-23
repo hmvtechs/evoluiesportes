@@ -124,7 +124,10 @@ export const getCompetition = async (req: Request, res: Response) => {
                 ),
                 registrations:TeamRegistration(
                     *,
-                    team:Team(*),
+                    team:Team(
+                        *,
+                        organization:Organization(*)
+                    ),
                     group:Group(*)
                 ),
                 venues:CompetitionVenue(

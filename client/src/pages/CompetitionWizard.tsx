@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Trophy, Calendar, Users, MapPin, FileText, CheckCircle, Plus, Trash } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE_URL } from '../config/api';
 
 const CompetitionWizard: React.FC = () => {
     const navigate = useNavigate();
@@ -38,7 +39,7 @@ const CompetitionWizard: React.FC = () => {
 
     const fetchVenues = async () => {
         try {
-            const response = await fetch('http://localhost:3000/api/v1/venues', {
+            const response = await fetch(`${API_BASE_URL}/api/v1/venues`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (response.ok) {
@@ -52,7 +53,7 @@ const CompetitionWizard: React.FC = () => {
 
     const fetchModalities = async () => {
         try {
-            const response = await fetch('http://localhost:3000/api/v1/modalities');
+            const response = await fetch(`${API_BASE_URL}/api/v1/modalities`);
             if (response.ok) {
                 const data = await response.json();
                 setAvailableModalities(data);
@@ -102,7 +103,7 @@ const CompetitionWizard: React.FC = () => {
     const handleSubmit = async () => {
         setLoading(true);
         try {
-            const response = await fetch('http://localhost:3000/api/v1/competitions', {
+            const response = await fetch(`${API_BASE_URL}/api/v1/competitions`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

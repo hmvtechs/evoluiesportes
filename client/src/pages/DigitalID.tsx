@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Printer } from 'lucide-react';
+import { API_BASE_URL } from '../config/api';
 
 const DigitalID: React.FC = () => {
     const { user } = useAuth();
@@ -8,7 +9,7 @@ const DigitalID: React.FC = () => {
 
     useEffect(() => {
         if (user) {
-            fetch(`http://localhost:3000/api/v1/digital-id/${user.id}/digital-id`)
+            fetch(`${API_BASE_URL}/api/v1/digital-id/${user.id}/digital-id`)
                 .then(res => res.json())
                 .then(setData);
         }

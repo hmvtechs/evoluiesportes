@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Calendar, Clock, MapPin } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE_URL } from '../config/api';
 
 const MyBookings: React.FC = () => {
     const { token } = useAuth();
@@ -13,8 +14,8 @@ const MyBookings: React.FC = () => {
 
     const fetchBookings = async () => {
         try {
-            const response = await fetch('http://localhost:3000/api/v1/bookings/my', {
-                headers: { 'Authorization': `Bearer ${token}` }
+            const response = await fetch(`${API_BASE_URL}/api/v1/bookings/my`, {
+                headers: { Authorization: `Bearer ${token}` },
             });
             const data = await response.json();
             setBookings(data);
@@ -38,7 +39,7 @@ const MyBookings: React.FC = () => {
                 <p>Nenhuma reserva encontrada.</p>
             ) : (
                 <div style={{ display: 'grid', gap: '1rem' }}>
-                    {bookings.map(booking => (
+                    {bookings.map((booking) => (
                         <div key={booking.id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div>
                                 <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -53,9 +54,7 @@ const MyBookings: React.FC = () => {
                                 <span className={`badge ${booking.status === 'CONFIRMED' ? 'badge-success' : 'badge-warning'}`}>
                                     {booking.status}
                                 </span>
-                                <p style={{ marginTop: '0.5rem', fontWeight: 'bold' }}>
-                                    R$ {booking.total_price.toFixed(2)}
-                                </p>
+                                <p style={{ marginTop: '0.5rem', fontWeight: 'bold' }}>R$ {booking.total_price.toFixed(2)}</p>
                             </div>
                         </div>
                     ))}

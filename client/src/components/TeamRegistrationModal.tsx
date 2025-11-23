@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Search, Plus, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE_URL } from '../config/api';
 
 interface Organization {
     id: number;
@@ -53,7 +54,7 @@ const TeamRegistrationModal: React.FC<TeamRegistrationModalProps> = ({ competiti
     const fetchOrganizations = async () => {
         setLoading(true);
         try {
-            const response = await fetch('http://localhost:3000/api/v1/organizations', {
+            const response = await fetch(`${API_BASE_URL}/api/v1/organizations`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (response.ok) {
@@ -76,7 +77,7 @@ const TeamRegistrationModal: React.FC<TeamRegistrationModalProps> = ({ competiti
 
         setSubmitting(true);
         try {
-            const response = await fetch('http://localhost:3000/api/v1/organizations', {
+            const response = await fetch(`${API_BASE_URL}/api/v1/organizations`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -112,7 +113,7 @@ const TeamRegistrationModal: React.FC<TeamRegistrationModalProps> = ({ competiti
 
         setSubmitting(true);
         try {
-            const response = await fetch(`http://localhost:3000/api/v1/competitions/${competitionId}/register-team`, {
+            const response = await fetch(`${API_BASE_URL}/api/v1/competitions/${competitionId}/register-team`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

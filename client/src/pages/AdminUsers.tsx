@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Edit, EyeOff, Loader } from 'lucide-react';
+import { API_BASE_URL } from '../config/api';
 
 interface User {
     id: string;
@@ -37,7 +38,7 @@ const AdminUsers: React.FC = () => {
         }
 
         try {
-            const res = await fetch('http://localhost:3000/api/v1/users/admin/users', {
+            const res = await fetch(`${API_BASE_URL}/api/v1/users/admin/users`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -68,7 +69,7 @@ const AdminUsers: React.FC = () => {
 
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:3000/api/v1/users/admin/${id}/obfuscate`, {
+            const res = await fetch(`${API_BASE_URL}/api/v1/users/admin/${id}/obfuscate`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,

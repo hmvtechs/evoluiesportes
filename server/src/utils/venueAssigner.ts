@@ -65,16 +65,14 @@ export function randomAssignment(
 
 /**
  * Balanced venue assignment
- * Distributes matches evenly across venuesbalances the number of matches per venue
+ * Distributes matches evenly across venues
  */
 export function balancedAssignment(
-    matches: MatchToAssign[],
-    venues: VenueWith
-
-Priority[]
+  matches: MatchToAssign[],
+  venues: VenueWithPriority[]
 ): VenueAssignment[] {
 
-    console.log(`\n=== BALANCED VENUE ASSIGNMENT ===`);
+  console.log(`\n=== BALANCED VENUE ASSIGNMENT ===`);
     console.log(`Matches: ${matches.length}`);
     console.log(`Venues: ${venues.length}`);
 

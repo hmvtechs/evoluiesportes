@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { API_BASE_URL } from '../config/api';
 
 interface Match {
     id: number;
@@ -30,7 +31,7 @@ const FixtureTable: React.FC = () => {
 
     const fetchFixture = async () => {
         try {
-            const response = await fetch(`http://localhost:3000/api/v1/competitions/${id}/fixture`);
+            const response = await fetch(`${API_BASE_URL}/api/v1/competitions/${id}/fixture`);
             if (response.ok) {
                 const data = await response.json();
                 setRounds(data.rounds || []);

@@ -1,0 +1,10 @@
+src/scripts/verifyCompetition.ts(20,25): error TS1005: ';' expected.
+src/scripts/verifyCompetition.ts(21,32): error TS1003: Identifier expected.
+src/scripts/verifyCompetition.ts(21,55): error TS1128: Declaration or statement expected.
+src/scripts/verifyCompetition.ts(21,57): error TS1128: Declaration or statement expected.
+src/scripts/verifyCompetition.ts(21,58): error TS1128: Declaration or statement expected.
+src/scripts/verifyCompetition.ts(49,5): error TS1128: Declaration or statement expected.
+src/scripts/verifyCompetition.ts(49,7): error TS1005: 'try' expected.
+src/scripts/verifyCompetition.ts(53,1): error TS1128: Declaration or statement expected.
+src/utils/venueAssigner.ts(74,1): error TS1005: ',' expected.
+src/utils/venueAssigner.ts(74,9): error TS1005: ',' expected.

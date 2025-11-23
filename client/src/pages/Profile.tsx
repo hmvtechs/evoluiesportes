@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE_URL } from '../config/api';
 
 const Profile: React.FC = () => {
     const { user } = useAuth();
@@ -9,13 +10,13 @@ const Profile: React.FC = () => {
     const handleUpdate = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const res = await fetch('http://localhost:3000/api/v1/users/profile', {
+            const res = await fetch(`${API_BASE_URL}/api/v1/users/profile`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}` // Mock auth middleware would need this
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
                 },
-                body: JSON.stringify({ userId: user?.id, password })
+                body: JSON.stringify({ userId: user?.id, password }),
             });
             if (res.ok) setMessage('Senha atualizada com sucesso!');
             else setMessage('Erro ao atualizar.');
@@ -42,11 +43,10 @@ const Profile: React.FC = () => {
                         <div style={{ fontWeight: 'bold' }}>{user?.role}</div>
                     </div>
                 </div>
-
                 <h3>Alterar Senha</h3>
                 <form onSubmit={handleUpdate} style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', marginTop: '1rem' }}>
                     <div style={{ flex: 1 }}>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem' }}>Nova Senha</label>
+                        <label style={{ display: 'block', marginBottom: '0.5rem' }}>Nova Senha</label>
                         <input type="password" className="input" value={password} onChange={e => setPassword(e.target.value)} />
                     </div>
                     <button type="submit" className="btn btn-primary">Salvar</button>

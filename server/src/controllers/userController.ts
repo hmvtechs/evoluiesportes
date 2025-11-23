@@ -1,14 +1,13 @@
 import { Request, Response } from 'express';
 import { supabase } from '../config/supabase';
-import { prisma } from '../config/prisma';
 import * as bcrypt from 'bcryptjs';
 
 /**
  * PUBLIC REGISTRATION
- * Creates a new user account in Local DB (Public.User)
+ * Creates a new user account in Supabase
  */
 export const register = async (req: Request, res: Response) => {
-    console.log('\n=== USER REGISTRATION ATTEMPT (LOCAL) ===');
+    console.log('\n=== USER REGISTRATION ATTEMPT (SUPABASE) ===');
     console.log('Timestamp:', new Date().toISOString());
 
     const { email, cpf, password, full_name, phone, sex, birth_date, city, state, role } = req.body;
@@ -21,17 +20,21 @@ export const register = async (req: Request, res: Response) => {
             });
         }
 
-        // Check if user already exists
-        const existingUser = await prisma.user.findFirst({
-            where: {
-                OR: [
-                    { email },
-                    { cpf: cpf.replace(/\D/g, '') }
-                ]
-            }
-        });
+        const cleanCpf = cpf.replace(/\D/g, '');
 
-        if (existingUser) {
+        // Check if user already exists
+        const { data: existingUsers, error: checkError } = await supabase
+            .from('User')
+            .select('id')
+            .or(`email.eq.${email},cpf.eq.${cleanCpf}`)
+            .limit(1);
+
+        if (checkError) {
+            console.error('Error checking existing user:', checkError);
+            return res.status(500).json({ error: 'Erro ao verificar usuário existente' });
+        }
+
+        if (existingUsers && existingUsers.length > 0) {
             return res.status(400).json({ error: 'Usuário já cadastrado com este email ou CPF' });
         }
 
@@ -43,22 +46,29 @@ export const register = async (req: Request, res: Response) => {
         const assignedRole = validRoles.includes(role) ? role : 'USER';
 
         // Create User
-        const newUser = await prisma.user.create({
-            data: {
+        const { data: newUser, error: createError } = await supabase
+            .from('User')
+            .insert({
                 email,
-                cpf: cpf.replace(/\D/g, ''),
+                cpf: cleanCpf,
                 password_hash: passwordHash,
                 full_name,
                 phone: phone || null,
                 sex: sex || null,
-                birth_date: (birth_date && !isNaN(Date.parse(birth_date))) ? new Date(birth_date) : null,
+                birth_date: (birth_date && !isNaN(Date.parse(birth_date))) ? birth_date : null,
                 city: city || null,
                 state: state || null,
                 rf_status: 'VALID', // Mock validation
                 role: assignedRole,
-                updated_at: new Date()
-            }
-        });
+                updated_at: new Date().toISOString()
+            })
+            .select()
+            .single();
+
+        if (createError) {
+            console.error('Error creating user:', createError);
+            return res.status(500).json({ error: 'Erro ao criar usuário' });
+        }
 
         console.log('✅ User created successfully:', newUser.email);
 
@@ -117,28 +127,20 @@ export const searchUsers = async (req: Request, res: Response) => {
         // Clean CPF (remove non-digits)
         const cleanedQuery = query.replace(/\D/g, '');
 
-        // Search by CPF (if query contains only digits) or by name
-        const users = await prisma.user.findMany({
-            where: {
-                OR: [
-                    { cpf: { contains: cleanedQuery } },
-                    { full_name: { contains: query, mode: 'insensitive' } }
-                ]
-            },
-            select: {
-                id: true,
-                full_name: true,
-                cpf: true,
-                email: true,
-                birth_date: true,
-                photo_url: true,
-                role: true
-            },
-            take: 10 // Limit results
-        });
+        // Search by CPF or by name (case-insensitive)
+        const { data: users, error } = await supabase
+            .from('User')
+            .select('id, full_name, cpf, email, birth_date, photo_url, role')
+            .or(`cpf.like.%${cleanedQuery}%,full_name.ilike.%${query}%`)
+            .limit(10);
 
-        console.log(`✅ Found ${users.length} users matching query`);
-        res.json(users);
+        if (error) {
+            console.error('Search error:', error);
+            return res.status(500).json({ error: 'Erro ao buscar usuários' });
+        }
+
+        console.log(`✅ Found ${users?.length || 0} users matching query`);
+        res.json(users || []);
     } catch (error: any) {
         console.error('❌ Error searching users:', error.message);
         res.status(500).json({ error: 'Erro ao buscar usuários' });
@@ -249,7 +251,7 @@ export const getDashboard = async (req: Request, res: Response) => {
             .from('CompetitionTeam')
             .select(`
                 competition_id,
-                Competition (
+                competition (
                     id,
                     name,
                     status,
@@ -352,3 +354,5 @@ export const getAdminDashboard = async (req: Request, res: Response) => {
         return res.status(500).json({ error: 'Erro ao carregar estatísticas' });
     }
 };
+
+

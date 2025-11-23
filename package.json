@@ -3,11 +3,16 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently \"npm run dev --prefix server\" \"npm run dev --prefix client -- --port 5173\"",
     "build": "vite build",
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "concurrently": "^9.1.2",
     "vite": "latest"
+  },
+  "dependencies": {
+    "cors": "^2.8.5"
   }
 }

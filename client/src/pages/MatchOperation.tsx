@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Play, Pause, Square, Plus, User as UserIcon } from 'lucide-react';
+import { API_BASE_URL } from '../config/api';
 
 interface Player {
     id: string;
@@ -38,29 +39,26 @@ const MatchOperation: React.FC = () => {
 
     const fetchMatchData = async () => {
         try {
-            // Hardcoded ID 1 for prototype
-            const res = await fetch('http://localhost:3000/api/v1/matches/1/lineup');
+            const res = await fetch(`${API_BASE_URL}/api/v1/matches/1/lineup`);
             if (res.ok) {
                 const json = await res.json();
                 setData(json);
             }
         } catch (e) {
-            console.error("Failed to fetch match");
+            console.error('Failed to fetch match');
         }
     };
 
     const handleEvent = async (type: string, playerId: string) => {
         try {
-            const res = await fetch('http://localhost:3000/api/v1/matches/1/events', {
+            const res = await fetch(`${API_BASE_URL}/api/v1/matches/1/events`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ type, player_id: playerId, minute: Math.floor(timer / 60) })
             });
-            if (res.ok) {
-                fetchMatchData(); // Refresh score
-            }
+            if (res.ok) fetchMatchData();
         } catch (e) {
-            console.error("Event failed");
+            console.error('Event failed');
         }
     };
 
@@ -82,7 +80,6 @@ const MatchOperation: React.FC = () => {
                     </div>
                     <h2 style={{ width: '30%', textAlign: 'left' }}>{data.match.away_team.organization.name_official}</h2>
                 </div>
-
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', alignItems: 'center' }}>
                     <div style={{ fontSize: '1.5rem', fontFamily: 'monospace' }}>{formatTime(timer)}</div>
                     <button className="btn" onClick={() => setIsRunning(!isRunning)}>
@@ -90,7 +87,6 @@ const MatchOperation: React.FC = () => {
                     </button>
                 </div>
             </div>
-
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
                 <TeamRoster teamName={data.match.home_team.organization.name_official} players={data.lineup.home} onEvent={handleEvent} />
                 <TeamRoster teamName={data.match.away_team.organization.name_official} players={data.lineup.away} onEvent={handleEvent} />
@@ -99,7 +95,7 @@ const MatchOperation: React.FC = () => {
     );
 };
 
-const TeamRoster: React.FC<{ teamName: string, players: Player[], onEvent: (t: string, id: string) => void }> = ({ teamName, players, onEvent }) => (
+const TeamRoster: React.FC<{ teamName: string; players: Player[]; onEvent: (t: string, id: string) => void }> = ({ teamName, players, onEvent }) => (
     <div className="card">
         <h3 style={{ marginBottom: '1rem', borderBottom: '1px solid var(--surface-light)', paddingBottom: '0.5rem' }}>{teamName}</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>

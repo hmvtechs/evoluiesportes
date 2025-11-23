@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Calendar as CalendarIcon, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE_URL } from '../config/api';
 
 const BookingCalendar: React.FC = () => {
     const { id } = useParams();
@@ -27,7 +28,7 @@ const BookingCalendar: React.FC = () => {
 
     const fetchVenue = async () => {
         try {
-            const response = await fetch(`http://localhost:3000/api/v1/venues/${id}`);
+            const response = await fetch(`${API_BASE_URL}/api/v1/venues/${id}`);
             const data = await response.json();
             setVenue(data);
         } catch (error) {
@@ -39,7 +40,7 @@ const BookingCalendar: React.FC = () => {
 
     const fetchAvailability = async () => {
         try {
-            const response = await fetch(`http://localhost:3000/api/v1/bookings/venue/${id}/availability?date=${selectedDate}`);
+            const response = await fetch(`${API_BASE_URL}/api/v1/bookings/venue/${id}/availability?date=${selectedDate}`);
             const data = await response.json();
             setAvailability(data);
         } catch (error) {
@@ -62,7 +63,7 @@ const BookingCalendar: React.FC = () => {
         const endTime = new Date(`${selectedDate}T${(hour + 1).toString().padStart(2, '0')}:00:00`);
 
         try {
-            const response = await fetch('http://localhost:3000/api/v1/bookings', {
+            const response = await fetch(`${API_BASE_URL}/api/v1/bookings`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

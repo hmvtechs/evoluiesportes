@@ -1,7 +1,5 @@
-import { PrismaClient } from '@prisma/client';
-import * as dotenv from 'dotenv';
-import * as path from 'path';
+// Prisma has been replaced by Supabase
+// This file is kept for backwards compatibility only
+// All database operations now use Supabase client from './supabase'
 
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
-
-export const prisma = new PrismaClient();
+export const prisma = null;

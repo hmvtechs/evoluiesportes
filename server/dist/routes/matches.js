@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const matchController_1 = require("../controllers/matchController");
+const router = (0, express_1.Router)();
+router.get('/:id/lineup', matchController_1.getLineup);
+router.post('/:id/events', matchController_1.addEvent);
+router.patch('/:id/status', matchController_1.updateStatus);
+router.post('/', matchController_1.createMatch);
+exports.default = router;

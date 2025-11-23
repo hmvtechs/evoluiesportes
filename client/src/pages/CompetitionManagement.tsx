@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import FixtureTable from '../components/FixtureTable';
 import TeamRegistrationModal from '../components/TeamRegistrationModal';
 import AthleteRosterModal from '../components/AthleteRosterModal';
+import { API_BASE_URL } from '../config/api';
 
 interface Competition {
     id: number;
@@ -63,7 +64,7 @@ const CompetitionManagement: React.FC = () => {
 
     const fetchCompetition = async () => {
         try {
-            const response = await fetch(`http://localhost:3000/api/v1/competitions/${id}`, {
+            const response = await fetch(`${API_BASE_URL}/api/v1/competitions/${id}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (response.ok) {
@@ -77,7 +78,7 @@ const CompetitionManagement: React.FC = () => {
 
     const fetchTeams = async () => {
         try {
-            const response = await fetch(`http://localhost:3000/api/v1/competitions/${id}`, {
+            const response = await fetch(`${API_BASE_URL}/api/v1/competitions/${id}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (response.ok) {
@@ -91,7 +92,7 @@ const CompetitionManagement: React.FC = () => {
 
     const fetchPhases = async () => {
         try {
-            const response = await fetch(`http://localhost:3000/api/v1/competitions/${id}`, {
+            const response = await fetch(`${API_BASE_URL}/api/v1/competitions/${id}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (response.ok) {
@@ -110,7 +111,7 @@ const CompetitionManagement: React.FC = () => {
 
         setLoading(true);
         try {
-            const response = await fetch(`http://localhost:3000/api/v1/competitions/${id}/draw-groups`, {
+            const response = await fetch(`${API_BASE_URL}/api/v1/competitions/${id}/draw-groups`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -143,7 +144,7 @@ const CompetitionManagement: React.FC = () => {
 
         setLoading(true);
         try {
-            const response = await fetch(`http://localhost:3000/api/v1/competitions/${id}/fixture`, {
+            const response = await fetch(`${API_BASE_URL}/api/v1/competitions/${id}/fixture`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

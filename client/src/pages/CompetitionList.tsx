@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Trophy, Plus, Calendar, Users, Edit } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE_URL } from '../config/api';
 
 interface Competition {
     id: number;
@@ -31,7 +32,7 @@ const CompetitionList: React.FC = () => {
 
     const fetchCompetitions = async () => {
         try {
-            const response = await fetch('http://localhost:3000/api/v1/competitions', {
+            const response = await fetch(`${API_BASE_URL}/api/v1/competitions`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (response.ok) {

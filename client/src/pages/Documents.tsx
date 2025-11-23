@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { FileText, Upload, CheckCircle, Clock } from 'lucide-react';
+import { API_BASE_URL } from '../config/api';
 
 const Documents: React.FC = () => {
     const { user, token } = useAuth();
@@ -10,7 +11,7 @@ const Documents: React.FC = () => {
     // Load existing documents
     useEffect(() => {
         if (user) {
-            fetch(`http://localhost:3000/api/v1/digital-id/${user.id}/documents`)
+            fetch(`${API_BASE_URL}/api/v1/digital-id/${user.id}/documents`)
                 .then(res => res.json())
                 .then(setDocs)
                 .catch(err => console.error('Failed to load documents', err));
@@ -24,7 +25,7 @@ const Documents: React.FC = () => {
         formData.append('type', type);
         formData.append('file', file);
         try {
-            const res = await fetch('http://localhost:3000/api/v1/digital-id/documents', {
+            const res = await fetch(`${API_BASE_URL}/api/v1/digital-id/documents`, {
                 method: 'POST',
                 headers: { Authorization: `Bearer ${token}` }, // let browser set multipart boundary
                 body: formData,

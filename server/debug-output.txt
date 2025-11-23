@@ -1,0 +1,55 @@
+­ƒöì Investigando estrutura de dados dos times...
+
+­ƒôï Competi├º├úo: pirapora (ID: 5)
+
+1´©ÅÔâú Query COM rela├º├Áes (como est├í no c├│digo):
+Ô£à Encontrados: 4 times
+
+­ƒôª Estrutura do primeiro time:
+{
+  "id": 3,
+  "competition_id": 5,
+  "group_id": 1,
+  "team_id": 2,
+  "status": "CONFIRMED",
+  "created_at": "2025-11-22T16:34:24.051",
+  "team": {
+    "id": 2,
+    "category": "Senior",
+    "organization": {
+      "id": 2,
+      "cnpj": "00.000.000/0000-00",
+      "name_official": "Clube Default",
+      "manager_user_id": "790ea60f-bbe7-40c7-a922-537d7d7f1047"
+    },
+    "championship_id": 2,
+    "organization_id": 2
+  },
+  "group": {
+    "id": 1,
+    "name": "Grupo A",
+    "phase_id": 1,
+    "teams_count": 0
+  }
+}
+
+2´©ÅÔâú Verificando estrutura da tabela Team:
+Ô£à Estrutura de Team:
+{
+  "id": 1,
+  "organization_id": 2,
+  "championship_id": 2,
+  "category": "Senior"
+}
+
+3´©ÅÔâú Verificando estrutura da tabela Organization:
+Ô£à Estrutura de Organization:
+{
+  "id": 2,
+  "name_official": "Clube Default",
+  "cnpj": "00.000.000/0000-00",
+  "manager_user_id": "790ea60f-bbe7-40c7-a922-537d7d7f1047"
+}
+
+4´©ÅÔâú Verificando como times aparecem em GameMatch:
+Ô£à Encontradas: 0 partidas
