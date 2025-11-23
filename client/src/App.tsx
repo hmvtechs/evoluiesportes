@@ -8,6 +8,7 @@ import MatchOperation from './pages/MatchOperation';
 import Profile from './pages/Profile';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminUsers from './pages/AdminUsers';
+import AdminOrganizations from './pages/AdminOrganizations';
 import DigitalID from './pages/DigitalID';
 import Documents from './pages/Documents';
 import ModulesDashboard from './pages/ModulesDashboard';
@@ -49,6 +50,7 @@ function App() {
             <Route path="documents" element={<Documents />} />
             <Route path="admin" element={<AdminDashboard />} />
             <Route path="admin/users" element={<AdminUsers />} />
+            <Route path="admin/organizations" element={<AdminOrganizations />} />
             {/* Venue & Booking Routes */}
             <Route path="venues" element={<VenueList />} />
             <Route path="venues/new" element={<VenueForm />} />

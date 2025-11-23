@@ -75,7 +75,7 @@ export const uploadDocument = async (req: Request, res: Response) => {
         const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(filePath);
 
         // Insert document record using admin client to bypass RLS
-        const { data: doc, error: docError } = await supabaseAdmin
+        const { data: doc, error: docError } = await supabaseAdmin!
             .from('Document')
             .insert([
                 {
@@ -94,7 +94,7 @@ export const uploadDocument = async (req: Request, res: Response) => {
 
         // If the uploaded file is a profile photo, update the user's photo_url
         if (type === 'PHOTO') {
-            const { error: updateError } = await supabaseAdmin
+            const { error: updateError } = await supabaseAdmin!
                 .from('User')
                 .update({ photo_url: publicUrl })
                 .eq('id', userId);
