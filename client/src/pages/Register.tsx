@@ -19,7 +19,7 @@ const Register: React.FC = () => {
         birth_date: '',
         city: '',
         state: '',
-        role: 'USER',
+        role: 'FAN',
     });
 
     const [rfStatus, setRfStatus] = useState<string | null>(null);
@@ -185,12 +185,14 @@ const Register: React.FC = () => {
                             Tipo de Conta <span style={{ color: 'var(--danger)' }}>*</span>
                         </label>
                         <select name="role" className="input" value={formData.role} onChange={handleChange} required>
-                            <option value="USER">Torcedor / Atleta</option>
-                            <option value="ENTITY">Organizador / Clube</option>
-                            <option value="STAFF">Staff / Árbitro</option>
+                            <option value="FAN">🎉 Torcedor</option>
+                            <option value="ATHLETE">🏃 Atleta</option>
+                            <option value="CLUB">⚽ Clube / Time</option>
+                            <option value="REFEREE">👨‍⚖️ Árbitro</option>
+                            <option value="STAFF">👔 Staff / Organizador</option>
                         </select>
                         <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                            Escolha como você pretende usar a plataforma.
+                            Escolha como você pretende usar a plataforma. Você pode alterar depois.
                         </p>
                     </div>
                     {/* Full Name */}

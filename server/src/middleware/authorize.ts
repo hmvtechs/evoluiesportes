@@ -11,8 +11,8 @@ export const authorize = (allowedRoles: string[]) => {
             return res.status(401).json({ error: 'Não autenticado' });
         }
 
-        // Se o usuário não tiver role definida, assumimos 'USER' por segurança, ou deixamos passar se a rota for pública (mas authorize implica proteção)
-        const userRole = user.role || 'USER';
+        // Se o usuário não tiver role definida, assumimos FAN (menor privilégio)
+        const userRole = user.role || 'FAN';
 
         if (!allowedRoles.includes(userRole)) {
             return res.status(403).json({

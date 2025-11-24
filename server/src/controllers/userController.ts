@@ -37,8 +37,9 @@ export const register = async (req: Request, res: Response) => {
         }
 
         // Validate Role
-        const validRoles = ['USER', 'ENTITY', 'STAFF'];
-        const assignedRole = validRoles.includes(role) ? role : 'USER';
+        // Importar roles válidos
+        const validRoles = ['ADMIN', 'STAFF', 'REFEREE', 'CLUB', 'ATHLETE', 'FAN'];
+        const assignedRole = validRoles.includes(role) ? role : 'FAN';
 
         // 1. Criar usuário no Supabase Auth (isso cria a senha na auth.users)
         const { data: authData, error: authError } = await supabase.auth.signUp({
