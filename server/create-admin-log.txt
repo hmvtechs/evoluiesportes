@@ -1,0 +1,49 @@
+­ƒº╣ Limpando banco e criando administrador...
+
+1´©ÅÔâú Limpando tabelas do banco...
+
+Ô£à Eventos de partidas: Limpo
+Ô£à Partidas: Limpo
+ÔÜá´©Å  TeamRegistration: update or delete on table "TeamRegistration" violates foreign key constraint "AthleteInscription_team_registration_id_fkey" on table "AthleteInscription"
+Ô£à Grupos: Limpo
+Ô£à Fases: Limpo
+Ô£à Locais de competi├º├úo: Limpo
+ÔÜá´©Å  Competition: update or delete on table "Competition" violates foreign key constraint "TeamRegistration_competition_id_fkey" on table "TeamRegistration"
+ÔÜá´©Å  Team: update or delete on table "Team" violates foreign key constraint "TeamRegistration_team_id_fkey" on table "TeamRegistration"
+Ô£à Reservas: Limpo
+Ô£à Locais: Limpo
+ÔÜá´©Å  Organization: update or delete on table "Organization" violates foreign key constraint "Team_organization_id_fkey" on table "Team"
+ÔÜá´©Å  User: update or delete on table "User" violates foreign key constraint "AthleteProfile_user_id_fkey" on table "AthleteProfile"
+
+2´©ÅÔâú Limpando usu├írios do Supabase Auth...
+
+Encontrados 1 usu├írios
+Ô£à Deletado: admin@sistema.com
+
+3´©ÅÔâú Criando novo usu├írio administrador...
+
+Ô£à Usu├írio criado em auth.users
+   ID: d3da08b1-be04-4f5c-8d59-2896d31aec78
+   Email: admin@sistema.com
+
+   Criando perfil na tabela User...
+   Dados do perfil: {
+  "id": "d3da08b1-be04-4f5c-8d59-2896d31aec78",
+  "email": "admin@sistema.com",
+  "cpf": "00000000000",
+  "full_name": "Administrador",
+  "role": "ADMIN",
+  "rf_status": "VALID",
+  "created_at": "2025-11-24T11:40:58.879Z",
+  "updated_at": "2025-11-24T11:40:58.881Z"
+}
+ÔØî Erro ao criar perfil: null value in column "password_hash" of relation "User" violates not-null constraint
+   Detalhes: {
+  code: '23502',
+  details: 'Failing row contains (d3da08b1-be04-4f5c-8d59-2896d31aec78, 00000000000, admin@sistema.com, null, null, Administrador, null, null, null, null, null, VALID, ADMIN, f, null, null, null, PRIVATE, t, 2025-11-24 11:40:58.879, 2025-11-24 11:40:58.881).',
+  hint: null,
+  message: 'null value in column "password_hash" of relation "User" violates not-null constraint'
+}
+
+ÔÜá´©Å  O usu├írio foi criado no auth.users mas o perfil falhou.
+   Voc├¬ pode criar manualmente ou tentar novamente.

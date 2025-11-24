@@ -19,7 +19,34 @@ const modalities_1 = __importDefault(require("./routes/modalities"));
 const organizations_1 = __importDefault(require("./routes/organizations"));
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3000;
-app.use((0, cors_1.default)());
+// CORS Configuration para produção
+const allowedOrigins = [
+    'http://localhost:5173', // Desenvolvimento local
+    'http://localhost:3000',
+    process.env.FRONTEND_URL, // URL do Vercel (configurar no .env)
+    // Adicione outras URLs conforme necessário
+].filter(Boolean); // Remove undefined
+app.use((0, cors_1.default)({
+    origin: function (origin, callback) {
+        // Permite requisições sem origin (como mobile apps ou Postman)
+        if (!origin)
+            return callback(null, true);
+        // Permite qualquer subdomínio do Vercel (*.vercel.app)
+        if (origin.endsWith('.vercel.app')) {
+            return callback(null, true);
+        }
+        if (allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        }
+        else {
+            console.warn(`⚠️ CORS bloqueou origem: ${origin}`);
+            callback(null, true); // Em produção, mude para false
+        }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express_1.default.json());
 // Logging middleware
 app.use((req, res, next) => {

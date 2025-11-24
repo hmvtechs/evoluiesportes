@@ -1,0 +1,36 @@
+­ƒöì Testando Autentica├º├úo Supabase...
+
+1´©ÅÔâú Verificando usu├írios na tabela User...
+
+Ô£à Encontrados 5 usu├írios na tabela User:
+   - user26@example.com (Atleta 26)
+   - user27@example.com (Atleta 27)
+   - admin@admin.com (Administrador)
+   - user1@example.com (Atleta 1)
+   - user2@example.com (Atleta 2)
+
+2´©ÅÔâú Tentando criar usu├írio de teste...
+
+ÔÜá´©Å Usu├írio admin@teste.com j├í existe
+
+3´©ÅÔâú Testando login com usu├írio de teste...
+
+Ô£à Login bem sucedido!
+   Token: eyJhbGciOiJIUzI1NiIsImtpZCI6ImRiemVWUi91ZTlUUjdQci...
+   User ID: 1de2255b-1f79-401a-8d11-19e5e5dcb0f5
+   Email: admin@teste.com
+
+4´©ÅÔâú Verificando pol├¡ticas de autentica├º├úo no Supabase...
+
+­ƒôØ Acesse: https://app.supabase.com/
+   ÔåÆ Seu projeto ÔåÆ Authentication ÔåÆ Providers
+   ÔåÆ Verifique se "Email" est├í habilitado
+   ÔåÆ Em "Email Auth" ÔåÆ Desabilite "Confirm email" para testes!
+
+============================================================
+RESUMO:
+============================================================
+Email de teste: admin@teste.com
+Senha de teste: Teste123!
+
+Use estas credenciais para testar o login no frontend!

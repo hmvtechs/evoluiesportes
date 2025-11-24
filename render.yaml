@@ -1,0 +1,22 @@
+# Build configuration for Render
+# https://render.com
+
+# Automatic build and deploy from this branch
+branch: main
+
+services:
+  # API Backend Service
+  - type: web
+    name: evoluigestao-api
+    env: node
+    buildCommand: cd server && npm install && npm run build
+    startCommand: cd server && node dist/app.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      # Add your other environment variables in Render Dashboard!
+      # SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_KEY, etc.
+    healthCheckPath: /
+    autoDeploy: true

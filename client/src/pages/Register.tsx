@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config/api';
 import { useAuth } from '../context/AuthContext';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, Eye, EyeOff } from 'lucide-react';
 
 const Register: React.FC = () => {
     const navigate = useNavigate();
@@ -25,6 +25,8 @@ const Register: React.FC = () => {
     const [rfStatus, setRfStatus] = useState<string | null>(null);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const validateCPF = (cpf: string) => {
         cpf = cpf.replace(/[^\d]+/g, '');
@@ -231,13 +233,75 @@ const Register: React.FC = () => {
                             <label style={{ display: 'block', marginBottom: '0.5rem' }}>
                                 Senha <span style={{ color: 'var(--danger)' }}>*</span>
                             </label>
-                            <input type="password" name="password" className="input" value={formData.password} onChange={handleChange} required />
+                            <div style={{ position: 'relative' }}>
+                                <input
+                                    type={showPassword ? "text" : "password"}
+                                    name="password"
+                                    className="input"
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                    style={{ paddingRight: '2.5rem' }}
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    style={{
+                                        position: 'absolute',
+                                        right: '0.75rem',
+                                        top: '50%',
+                                        transform: 'translateY(-50%)',
+                                        background: 'none',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        color: 'var(--text-muted)',
+                                        padding: '0.25rem',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center'
+                                    }}
+                                    aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                                >
+                                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                </button>
+                            </div>
                         </div>
                         <div>
                             <label style={{ display: 'block', marginBottom: '0.5rem' }}>
                                 Confirmar Senha <span style={{ color: 'var(--danger)' }}>*</span>
                             </label>
-                            <input type="password" name="confirmPassword" className="input" value={formData.confirmPassword} onChange={handleChange} required />
+                            <div style={{ position: 'relative' }}>
+                                <input
+                                    type={showConfirmPassword ? "text" : "password"}
+                                    name="confirmPassword"
+                                    className="input"
+                                    value={formData.confirmPassword}
+                                    onChange={handleChange}
+                                    style={{ paddingRight: '2.5rem' }}
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                    style={{
+                                        position: 'absolute',
+                                        right: '0.75rem',
+                                        top: '50%',
+                                        transform: 'translateY(-50%)',
+                                        background: 'none',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        color: 'var(--text-muted)',
+                                        padding: '0.25rem',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center'
+                                    }}
+                                    aria-label={showConfirmPassword ? "Ocultar senha" : "Mostrar senha"}
+                                >
+                                    {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                </button>
+                            </div>
                         </div>
                     </div>
                     {/* City and State */}
