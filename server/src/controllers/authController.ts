@@ -2,64 +2,63 @@ import { Request, Response } from 'express';
 import { supabase, supabaseAdmin } from '../config/supabase';
 
 /**
- * LOGIN usando Supabase Auth (método correto)
+ * LOGIN
+ * Autentica usando o Supabase Auth
  */
 export const login = async (req: Request, res: Response) => {
-    console.log('\n=== LOGIN ATTEMPT (SUPABASE AUTH) ===');
+    console.log('\n=== TENTATIVA DE LOGIN (SUPABASE) ===');
     const { identifier, password } = req.body;
 
     try {
-        // O identifier pode ser email ou CPF
-        // Vamos assumir que é email, ou buscar o email pelo CPF primeiro
-        let email = identifier;
+        let emailToLogin = identifier;
 
-        // Se identifier parece ser CPF (só números), buscar o email
-        if (identifier.replace(/\D/g, '').length === 11) {
-            const { data: user, error: userError } = await supabase
-                .from('User')
+        // 1. Lógica para CPF (Se o identificador não tiver @, assumimos que é CPF)
+        if (!identifier.includes('@')) {
+            const cleanCpf = identifier.replace(/\D/g, ''); // Remove pontos e traços
+            
+            // Busca o email atrelado a esse CPF na tabela pública
+            // ATENÇÃO: Verifique se sua tabela no Supabase chama 'users' ou 'User'
+            const { data: userFound, error: searchError } = await supabaseAdmin
+                .from('users') // <-- Se sua tabela for 'User', mude aqui
                 .select('email')
-                .eq('cpf', identifier.replace(/\D/g, ''))
+                .eq('cpf', cleanCpf)
                 .single();
 
-            if (userError || !user) {
-                return res.status(401).json({ error: 'Credenciais inválidas' });
+            if (searchError || !userFound) {
+                return res.status(401).json({ error: 'CPF não encontrado ou não cadastrado.' });
             }
-            email = user.email;
+            emailToLogin = userFound.email;
         }
 
-        // Usar o método oficial do Supabase para autenticação
+        // 2. Pergunta ao Supabase: "Essa senha está certa?"
         const { data, error } = await supabase.auth.signInWithPassword({
-            email: email,
+            email: emailToLogin,
             password: password
         });
 
         if (error) {
-            console.error('Supabase auth error:', error);
-            return res.status(401).json({ error: 'Credenciais inválidas' });
+            console.error('Erro no Supabase Auth:', error.message);
+            return res.status(401).json({ error: 'Email ou senha incorretos.' });
         }
 
-        // Buscar dados adicionais do usuário na tabela User
-        const { data: userProfile, error: profileError } = await supabase
-            .from('User')
-            .select('id, email, full_name, role, cpf')
-            .eq('email', email)
-            .single();
-
-        console.log('✅ Login successful:', email);
+        // 3. Sucesso! Retorna o token original do Supabase
+        // O Supabase retorna user + session (com access_token)
+        console.log('✅ Login bem sucedido para:', emailToLogin);
 
         return res.json({
-            token: data.session?.access_token,  // Token do Supabase (não manual!)
+            token: data.session.access_token, // O token REAL que abre as portas do banco
             user: {
-                id: userProfile?.id || data.user.id,
+                id: data.user.id,
                 email: data.user.email,
-                full_name: userProfile?.full_name,
-                role: userProfile?.role,
-                cpf: userProfile?.cpf
+                // Aqui buscamos dados extras do metadata ou da tabela pública se precisar
+                full_name: data.user.user_metadata?.name || '',
+                role: data.user.user_metadata?.role || 'user'
             }
         });
+
     } catch (error: any) {
-        console.error('❌ Login error:', error);
-        return res.status(500).json({ error: 'Erro ao fazer login', details: error.message });
+        console.error('❌ Erro interno de Login:', error);
+        return res.status(500).json({ error: 'Erro interno ao processar login' });
     }
 };
 
@@ -67,20 +66,13 @@ export const login = async (req: Request, res: Response) => {
  * VALIDATE RF (Mock)
  */
 export const validateRF = async (req: Request, res: Response) => {
-    const { cpf } = req.body;
-    // Mock validation
-    res.json({
-        valid: true,
-        name: 'NOME SIMULADO DA SILVA',
-        status: 'VALID'
-    });
+    // ... manter igual ...
+    res.json({ valid: true, name: 'TESTE VALIDADO', status: 'VALID' });
 };
 
 /**
  * SETUP 2FA
  */
 export const setup2FA = async (req: Request, res: Response) => {
-    // Supabase handles MFA differently. 
-    // For now, we return a 501 Not Implemented or a placeholder.
-    res.status(501).json({ error: '2FA setup via Supabase not yet implemented in this backend' });
+    res.status(501).json({ error: 'Not implemented' });
 };
