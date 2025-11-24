@@ -18,7 +18,7 @@ export const login = async (req: Request, res: Response) => {
             
             // Busca o email atrelado a esse CPF na tabela pública
             // ATENÇÃO: Verifique se sua tabela no Supabase chama 'users' ou 'User'
-            const { data: userFound, error: searchError } = await supabaseAdmin
+            const { data: userFound, error: searchError } = await supabaseAdmin!
                 .from('users') // <-- Se sua tabela for 'User', mude aqui
                 .select('email')
                 .eq('cpf', cleanCpf)
