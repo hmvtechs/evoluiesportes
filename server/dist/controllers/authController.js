@@ -1,84 +1,53 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.setup2FA = exports.validateRF = exports.login = void 0;
 const supabase_1 = require("../config/supabase");
-const bcrypt = __importStar(require("bcryptjs"));
-const jwt = __importStar(require("jsonwebtoken"));
 /**
- * LOGIN
- * Authenticate user via email/CPF and password using Supabase
+ * LOGIN usando Supabase Auth (método correto)
  */
 const login = async (req, res) => {
-    console.log('\n=== LOGIN ATTEMPT (SUPABASE) ===');
+    console.log('\n=== LOGIN ATTEMPT (SUPABASE AUTH) ===');
     const { identifier, password } = req.body;
     try {
-        // 1. Find user by email or CPF
-        const { data: users, error } = await supabase_1.supabase
-            .from('User')
-            .select('*')
-            .or(`email.eq.${identifier},cpf.eq.${identifier.replace(/\D/g, '')}`)
-            .limit(1);
+        // O identifier pode ser email ou CPF
+        // Vamos assumir que é email, ou buscar o email pelo CPF primeiro
+        let email = identifier;
+        // Se identifier parece ser CPF (só números), buscar o email
+        if (identifier.replace(/\D/g, '').length === 11) {
+            const { data: user, error: userError } = await supabase_1.supabase
+                .from('User')
+                .select('email')
+                .eq('cpf', identifier.replace(/\D/g, ''))
+                .single();
+            if (userError || !user) {
+                return res.status(401).json({ error: 'Credenciais inválidas' });
+            }
+            email = user.email;
+        }
+        // Usar o método oficial do Supabase para autenticação
+        const { data, error } = await supabase_1.supabase.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
         if (error) {
-            console.error('Supabase query error:', error);
-            return res.status(500).json({ error: 'Erro ao buscar usuário' });
-        }
-        const user = users && users.length > 0 ? users[0] : null;
-        if (!user) {
+            console.error('Supabase auth error:', error);
             return res.status(401).json({ error: 'Credenciais inválidas' });
         }
-        // 2. Verify password
-        const isValid = await bcrypt.compare(password, user.password_hash);
-        if (!isValid) {
-            return res.status(401).json({ error: 'Credenciais inválidas' });
-        }
-        // 3. Generate JWT
-        const token = jwt.sign({
-            userId: user.id,
-            email: user.email,
-            role: user.role
-        }, process.env.JWT_SECRET || 'your-secret-key-change-in-production', { expiresIn: '24h' });
-        console.log('✅ Login successful:', user.email);
+        // Buscar dados adicionais do usuário na tabela User
+        const { data: userProfile, error: profileError } = await supabase_1.supabase
+            .from('User')
+            .select('id, email, full_name, role, cpf')
+            .eq('email', email)
+            .single();
+        console.log('✅ Login successful:', email);
         return res.json({
-            token,
+            token: data.session?.access_token, // Token do Supabase (não manual!)
             user: {
-                id: user.id,
-                email: user.email,
-                full_name: user.full_name,
-                role: user.role,
-                cpf: user.cpf
+                id: userProfile?.id || data.user.id,
+                email: data.user.email,
+                full_name: userProfile?.full_name,
+                role: userProfile?.role,
+                cpf: userProfile?.cpf
             }
         });
     }

@@ -1,13 +1,11 @@
 import { Request, Response } from 'express';
 import { supabase } from '../config/supabase';
-import * as bcrypt from 'bcryptjs';
 
 /**
- * PUBLIC REGISTRATION
- * Creates a new user account in Supabase
+ * PUBLIC REGISTRATION usando Supabase Auth (método correto)
  */
 export const register = async (req: Request, res: Response) => {
-    console.log('\n=== USER REGISTRATION ATTEMPT (SUPABASE) ===');
+    console.log('\n=== USER REGISTRATION ATTEMPT (SUPABASE AUTH) ===');
     console.log('Timestamp:', new Date().toISOString());
 
     const { email, cpf, password, full_name, phone, sex, birth_date, city, state, role } = req.body;
@@ -22,7 +20,7 @@ export const register = async (req: Request, res: Response) => {
 
         const cleanCpf = cpf.replace(/\D/g, '');
 
-        // Check if user already exists
+        // Check if user already exists na tabela User
         const { data: existingUsers, error: checkError } = await supabase
             .from('User')
             .select('id')
@@ -38,20 +36,33 @@ export const register = async (req: Request, res: Response) => {
             return res.status(400).json({ error: 'Usuário já cadastrado com este email ou CPF' });
         }
 
-        // Hash password
-        const passwordHash = await bcrypt.hash(password, 10);
-
         // Validate Role
         const validRoles = ['USER', 'ENTITY', 'STAFF'];
         const assignedRole = validRoles.includes(role) ? role : 'USER';
 
-        // Create User
+        // 1. Criar usuário no Supabase Auth (isso cria a senha na auth.users)
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+            email: email,
+            password: password
+        });
+
+        if (authError) {
+            console.error('Error creating auth user:', authError);
+            return res.status(500).json({ error: 'Erro ao criar conta: ' + authError.message });
+        }
+
+        if (!authData.user) {
+            return res.status(500).json({ error: 'Erro ao criar usuário' });
+        }
+
+        // 2. Criar perfil do usuário na tabela User (SEM password_hash!)
         const { data: newUser, error: createError } = await supabase
             .from('User')
             .insert({
+                id: authData.user.id,  // Usar o mesmo ID do auth.users
                 email,
                 cpf: cleanCpf,
-                password_hash: passwordHash,
+                // NÃO incluir password_hash - fica só no auth.users!
                 full_name,
                 phone: phone || null,
                 sex: sex || null,
@@ -66,8 +77,10 @@ export const register = async (req: Request, res: Response) => {
             .single();
 
         if (createError) {
-            console.error('Error creating user:', createError);
-            return res.status(500).json({ error: 'Erro ao criar usuário' });
+            console.error('Error creating user profile:', createError);
+            // Se falhar, tentar limpar o usuário do auth
+            await supabase.auth.admin.deleteUser(authData.user.id);
+            return res.status(500).json({ error: 'Erro ao criar perfil do usuário' });
         }
 
         console.log('✅ User created successfully:', newUser.email);
@@ -251,7 +264,7 @@ export const getDashboard = async (req: Request, res: Response) => {
             .from('CompetitionTeam')
             .select(`
                 competition_id,
-                competition (
+                Competition (
                     id,
                     name,
                     status,
@@ -354,5 +367,3 @@ export const getAdminDashboard = async (req: Request, res: Response) => {
         return res.status(500).json({ error: 'Erro ao carregar estatísticas' });
     }
 };
-
-

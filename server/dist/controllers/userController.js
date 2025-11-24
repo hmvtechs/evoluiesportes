@@ -1,47 +1,12 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAdminDashboard = exports.getDashboard = exports.updateProfile = exports.obfuscateUser = exports.updateAdminUser = exports.searchUsers = exports.getUsers = exports.register = void 0;
 const supabase_1 = require("../config/supabase");
-const bcrypt = __importStar(require("bcryptjs"));
 /**
- * PUBLIC REGISTRATION
- * Creates a new user account in Supabase
+ * PUBLIC REGISTRATION usando Supabase Auth (método correto)
  */
 const register = async (req, res) => {
-    console.log('\n=== USER REGISTRATION ATTEMPT (SUPABASE) ===');
+    console.log('\n=== USER REGISTRATION ATTEMPT (SUPABASE AUTH) ===');
     console.log('Timestamp:', new Date().toISOString());
     const { email, cpf, password, full_name, phone, sex, birth_date, city, state, role } = req.body;
     try {
@@ -52,7 +17,7 @@ const register = async (req, res) => {
             });
         }
         const cleanCpf = cpf.replace(/\D/g, '');
-        // Check if user already exists
+        // Check if user already exists na tabela User
         const { data: existingUsers, error: checkError } = await supabase_1.supabase
             .from('User')
             .select('id')
@@ -65,18 +30,29 @@ const register = async (req, res) => {
         if (existingUsers && existingUsers.length > 0) {
             return res.status(400).json({ error: 'Usuário já cadastrado com este email ou CPF' });
         }
-        // Hash password
-        const passwordHash = await bcrypt.hash(password, 10);
         // Validate Role
         const validRoles = ['USER', 'ENTITY', 'STAFF'];
         const assignedRole = validRoles.includes(role) ? role : 'USER';
-        // Create User
+        // 1. Criar usuário no Supabase Auth (isso cria a senha na auth.users)
+        const { data: authData, error: authError } = await supabase_1.supabase.auth.signUp({
+            email: email,
+            password: password
+        });
+        if (authError) {
+            console.error('Error creating auth user:', authError);
+            return res.status(500).json({ error: 'Erro ao criar conta: ' + authError.message });
+        }
+        if (!authData.user) {
+            return res.status(500).json({ error: 'Erro ao criar usuário' });
+        }
+        // 2. Criar perfil do usuário na tabela User (SEM password_hash!)
         const { data: newUser, error: createError } = await supabase_1.supabase
             .from('User')
             .insert({
+            id: authData.user.id, // Usar o mesmo ID do auth.users
             email,
             cpf: cleanCpf,
-            password_hash: passwordHash,
+            // NÃO incluir password_hash - fica só no auth.users!
             full_name,
             phone: phone || null,
             sex: sex || null,
@@ -90,8 +66,10 @@ const register = async (req, res) => {
             .select()
             .single();
         if (createError) {
-            console.error('Error creating user:', createError);
-            return res.status(500).json({ error: 'Erro ao criar usuário' });
+            console.error('Error creating user profile:', createError);
+            // Se falhar, tentar limpar o usuário do auth
+            await supabase_1.supabase.auth.admin.deleteUser(authData.user.id);
+            return res.status(500).json({ error: 'Erro ao criar perfil do usuário' });
         }
         console.log('✅ User created successfully:', newUser.email);
         res.status(201).json({
@@ -263,7 +241,7 @@ const getDashboard = async (req, res) => {
             .from('CompetitionTeam')
             .select(`
                 competition_id,
-                competition (
+                Competition (
                     id,
                     name,
                     status,

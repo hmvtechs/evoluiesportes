@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const competitionController_1 = require("../controllers/competitionController");
-const athleteController_1 = require("../controllers/athleteController");
+// import { addAthleteToTeam, listTeamAthletes, removeAthleteFromTeam } from '../controllers/athleteController';  // Temporariamente desabilitado
 const authenticate_1 = require("../middleware/authenticate");
 const authorize_1 = require("../middleware/authorize");
 const router = (0, express_1.Router)();
@@ -17,7 +17,8 @@ router.get('/:id/fixture', competitionController_1.getFixture); // Public or aut
 // Athlete management routes (for TeamRegistration)
 // Note: These use /team-registrations prefix but are in competitions router for now
 // TODO: Consider creating separate team-registrations router if it grows
-router.post('/team-registrations/:id/athletes', authenticate_1.authenticate, (0, authorize_1.authorize)(['ADMIN']), athleteController_1.addAthleteToTeam);
-router.get('/team-registrations/:id/athletes', authenticate_1.authenticate, (0, authorize_1.authorize)(['ADMIN']), athleteController_1.listTeamAthletes);
-router.delete('/team-registrations/:id/athletes/:athleteId', authenticate_1.authenticate, (0, authorize_1.authorize)(['ADMIN']), athleteController_1.removeAthleteFromTeam);
+// TEMPORARIAMENTE DESABILITADO - controller não implementado ainda
+// router.post('/team-registrations/:id/athletes', authenticate, authorize(['ADMIN']), addAthleteToTeam);
+// router.get('/team-registrations/:id/athletes', authenticate, authorize(['ADMIN']), listTeamAthletes);
+// router.delete('/team-registrations/:id/athletes/:athleteId', authenticate, authorize(['ADMIN']), removeAthleteFromTeam);
 exports.default = router;

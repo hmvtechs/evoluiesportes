@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { createCompetition, listCompetitions, getCompetition, uploadRegulation, generateFixture, registerTeam, drawGroups, getFixture } from '../controllers/competitionController';
-import { addAthleteToTeam, listTeamAthletes, removeAthleteFromTeam } from '../controllers/athleteController';
+// import { addAthleteToTeam, listTeamAthletes, removeAthleteFromTeam } from '../controllers/athleteController';  // Temporariamente desabilitado
 import { authenticate } from '../middleware/authenticate';
 import { authorize } from '../middleware/authorize';
 
@@ -18,8 +18,9 @@ router.get('/:id/fixture', getFixture); // Public or authenticated?
 // Athlete management routes (for TeamRegistration)
 // Note: These use /team-registrations prefix but are in competitions router for now
 // TODO: Consider creating separate team-registrations router if it grows
-router.post('/team-registrations/:id/athletes', authenticate, authorize(['ADMIN']), addAthleteToTeam);
-router.get('/team-registrations/:id/athletes', authenticate, authorize(['ADMIN']), listTeamAthletes);
-router.delete('/team-registrations/:id/athletes/:athleteId', authenticate, authorize(['ADMIN']), removeAthleteFromTeam);
+// TEMPORARIAMENTE DESABILITADO - controller não implementado ainda
+// router.post('/team-registrations/:id/athletes', authenticate, authorize(['ADMIN']), addAthleteToTeam);
+// router.get('/team-registrations/:id/athletes', authenticate, authorize(['ADMIN']), listTeamAthletes);
+// router.delete('/team-registrations/:id/athletes/:athleteId', authenticate, authorize(['ADMIN']), removeAthleteFromTeam);
 
 export default router;
