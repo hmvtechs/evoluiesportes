@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config/api';
-import { useAuth } from '../context/AuthContext';
-import { ArrowLeft, Save, Eye, EyeOff } from 'lucide-react';
+import { Save, Eye, EyeOff } from 'lucide-react';
 
 const Register: React.FC = () => {
     const navigate = useNavigate();
-    const { token } = useAuth(); // token may not be needed for registration
 
     const [formData, setFormData] = useState({
         email: '',
@@ -63,59 +61,80 @@ const Register: React.FC = () => {
         setError('');
     };
 
+    /**
+     * Validates CPF with apicpf.com API when user leaves the CPF field
+     */
     const handleBlurCpf = async () => {
         const cleanCpf = formData.cpf.replace(/\D/g, '');
         if (cleanCpf.length !== 11) {
-            setRfStatus('CPF deve ter 11 dígitos');
+            setRfStatus('❌ CPF deve ter 11 dígitos');
             return;
         }
         if (!validateCPF(cleanCpf)) {
-            setRfStatus('CPF Inválido (Dígito verificador incorreto)');
+            setRfStatus('❌ CPF inválido (dígito verificador incorreto)');
             return;
         }
+
+        setRfStatus('🔍 Validando CPF...');
+
         try {
             const res = await fetch(`${API_BASE_URL}/api/v1/auth/validate-rf`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ cpf: cleanCpf }),
             });
+
             const data = await res.json();
-            if (res.ok && (data.status === 'VALID' || data.status === 'REGULAR')) {
-                setRfStatus('✓ Válido na Receita Federal');
+
+            if (res.ok && data.valid) {
+                setRfStatus('✅ CPF válido');
+
+                // Auto-fill name if returned by API and field is empty
                 if (data.name && !formData.full_name) {
                     setFormData(prev => ({ ...prev, full_name: data.name }));
                 }
+            } else if (data.status === 'TIMEOUT') {
+                setRfStatus('⏱️ Timeout ao consultar API. Tente novamente.');
+            } else if (data.status === 'RATE_LIMIT') {
+                setRfStatus('⚠️ Limite de requisições excedido. Aguarde um momento.');
+            } else if (data.status === 'NOT_FOUND') {
+                setRfStatus('⚠️ CPF não encontrado na base de dados');
             } else {
-                setRfStatus('✗ ' + (data.error || 'CPF Irregular na Receita'));
+                setRfStatus('❌ ' + (data.error || 'CPF irregular'));
             }
         } catch (err) {
-            console.error(err);
-            setRfStatus('Erro ao validar na Receita (Offline?)');
+            console.error('CPF validation error:', err);
+            setRfStatus('⚠️ Erro ao validar CPF. Verifique sua conexão.');
         }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError('');
         const cleanCpf = formData.cpf.replace(/\D/g, '');
+
         // Basic validation
         if (!formData.email || !cleanCpf || !formData.password || !formData.full_name) {
             setError('Por favor, preencha todos os campos obrigatórios');
             return;
         }
+
         if (!validateCPF(cleanCpf)) {
             setError('CPF Inválido');
             return;
         }
+
         if (formData.password !== formData.confirmPassword) {
             setError('As senhas não coincidem');
             return;
         }
+
         if (formData.password.length < 4) {
             setError('A senha deve ter pelo menos 4 caracteres');
             return;
         }
+
         setLoading(true);
+
         try {
             const res = await fetch(`${API_BASE_URL}/api/v1/users`, {
                 method: 'POST',
@@ -133,7 +152,9 @@ const Register: React.FC = () => {
                     role: formData.role,
                 }),
             });
+
             const data = await res.json();
+
             if (res.ok) {
                 alert('✅ Cadastro realizado com sucesso! Faça login para continuar.');
                 navigate('/login');
@@ -174,7 +195,7 @@ const Register: React.FC = () => {
                             required
                         />
                         {rfStatus && (
-                            <p style={{ fontSize: '0.75rem', marginTop: '0.25rem', color: rfStatus.includes('✓') ? 'var(--success)' : 'var(--danger)' }}>
+                            <p style={{ fontSize: '0.75rem', marginTop: '0.25rem', color: rfStatus.includes('✅') ? 'var(--success)' : 'var(--danger)' }}>
                                 {rfStatus}
                             </p>
                         )}

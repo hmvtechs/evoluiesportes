@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { supabase, supabaseAdmin } from '../config/supabase';
+import { cpfValidationService } from '../services/cpfValidationService';
 
 /**
  * LOGIN - Autentica usando Supabase Auth
@@ -58,10 +59,43 @@ export const login = async (req: Request, res: Response) => {
 };
 
 /**
- * VALIDATE RF (Mock)
+ * VALIDATE RF - Valida CPF usando apicpf.com API
  */
 export const validateRF = async (req: Request, res: Response) => {
-    res.json({ valid: true, name: 'TESTE VALIDADO', status: 'VALID' });
+    const { cpf } = req.body;
+
+    if (!cpf) {
+        return res.status(400).json({ error: 'CPF é obrigatório' });
+    }
+
+    try {
+        console.log('\n=== VALIDATING CPF ===');
+        const result = await cpfValidationService.validateCPF(cpf);
+
+        if (result.valid) {
+            return res.json({
+                valid: true,
+                status: result.status,
+                name: result.name,
+                birthDate: result.birthDate,
+                situation: result.situation,
+            });
+        } else {
+            return res.status(400).json({
+                valid: false,
+                status: result.status,
+                error: result.error || 'CPF irregular',
+                situation: result.situation,
+            });
+        }
+    } catch (error: any) {
+        console.error('❌ Error validating CPF:', error);
+        return res.status(500).json({
+            valid: false,
+            status: 'ERROR',
+            error: 'Erro ao validar CPF. Tente novamente mais tarde.',
+        });
+    }
 };
 
 /**
