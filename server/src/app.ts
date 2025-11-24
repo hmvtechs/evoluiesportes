@@ -4,6 +4,7 @@ dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 import express from 'express';
 import cors from 'cors';
+import os from 'os';
 import authRoutes from './routes/auth';
 import matchRoutes from './routes/matches';
 import userRoutes from './routes/users';
@@ -17,13 +18,14 @@ import organizationRoutes from './routes/organizations';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// CORS Configuration para produção
-const allowedOrigins = [
+// CORS Configuration para produção e rede local
+const allowedOrigins: (string | RegExp)[] = [
     'http://localhost:5173',  // Desenvolvimento local
     'http://localhost:3000',
     process.env.FRONTEND_URL,  // URL do Vercel (configurar no .env)
-    // Adicione outras URLs conforme necessário
-].filter(Boolean); // Remove undefined
+    /^http:\/\/192\.168\.\d{1,3}\.\d{1,3}(:\d+)?$/,  // Rede local 192.168.x.x
+    /^http:\/\/10\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?$/,  // Rede local 10.x.x.x
+].filter(Boolean) as (string | RegExp)[];
 
 app.use(cors({
     origin: function (origin, callback) {
@@ -35,11 +37,26 @@ app.use(cors({
             return callback(null, true);
         }
 
-        if (allowedOrigins.indexOf(origin) !== -1) {
+        // Permite ngrok e outros túneis (*.ngrok.io, *.ngrok-free.app, *.loca.lt)
+        if (origin.includes('.ngrok.io') || origin.includes('.ngrok-free.app') || origin.includes('.loca.lt')) {
+            return callback(null, true);
+        }
+
+        // Verifica se origin está na lista (suporta strings e RegExp)
+        const isAllowed = allowedOrigins.some(allowed => {
+            if (typeof allowed === 'string') {
+                return allowed === origin;
+            } else if (allowed instanceof RegExp) {
+                return allowed.test(origin);
+            }
+            return false;
+        });
+
+        if (isAllowed) {
             callback(null, true);
         } else {
             console.warn(`⚠️ CORS bloqueou origem: ${origin}`);
-            callback(null, true); // Em produção, mude para false
+            callback(null, true); // Em produção, mude para false se necessário
         }
     },
     credentials: true,
@@ -76,6 +93,29 @@ app.use((err: any, req: any, res: any, next: any) => {
     res.status(500).json({ error: err.message || 'Internal server error' });
 });
 
-app.listen(PORT, () => {
+// Start server on all network interfaces
+const server = app.listen(Number(PORT), '0.0.0.0', () => {
     console.log(`Server is running on http://localhost:${PORT}`);
+
+    // Exibir IPs da rede local
+    const networkInterfaces = os.networkInterfaces();
+    const addresses: string[] = [];
+
+    Object.keys(networkInterfaces).forEach((interfaceName) => {
+        networkInterfaces[interfaceName]?.forEach((iface) => {
+            if (iface.family === 'IPv4' && !iface.internal) {
+                addresses.push(iface.address);
+            }
+        });
+    });
+
+    if (addresses.length > 0) {
+        console.log(`\n🌐 Acesso na rede local:`);
+        addresses.forEach(addr => {
+            console.log(`   http://${addr}:${PORT}`);
+        });
+        console.log('');
+    }
 });
+
+export default app;

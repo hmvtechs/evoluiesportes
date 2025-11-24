@@ -15,8 +15,8 @@ const authenticate = async (req, res, next) => {
             console.error('Erro validação token:', error?.message);
             return res.status(401).json({ error: 'Token inválido ou expirado' });
         }
-        // Extrair role do metadata ou usar padrão
-        const role = user.user_metadata?.role || 'USER';
+        // Extrair role do metadata ou usar padrão (FAN = menor privilégio)
+        const role = user.user_metadata?.role || 'FAN';
         req.user = {
             userId: user.id,
             email: user.email,
