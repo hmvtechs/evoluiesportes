@@ -394,3 +394,114 @@ export const getFixture = async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Failed to get fixture' });
     }
 };
+
+/**
+ * GENERATE BRACKET - Knockout/Elimination Tournament
+ * Implements exact algorithm as specified by user:
+ * 1. Get approved teams from Competition_Registrations
+ * 2. Validate >= 2 teams
+ * 3. Shuffle randomly
+ * 4. Pair 2-by-2 for round 1
+ * 5. Handle odd teams (bye)
+ * 6. Create matches with status SCHEDULED
+ * 7. Update competition status to 'Em andamento'
+ */
+export const generateBracketKnockout = async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    try {
+        console.log(`\n=== GENERATING KNOCKOUT BRACKET ===`);
+        console.log(`Competition ID: ${id}`);
+
+        // 1. Fetch approved team registrations
+        const { data: registrations, error: regError } = await supabase
+            .from('TeamRegistration')
+            .select('team_id, team:Team(id, organization:Organization(name_official))')
+            .eq('competition_id', Number(id))
+            .in('status', ['CONFIRMED', 'APPROVED']);
+
+        if (regError) throw regError;
+        if (!registrations || registrations.length < 2) {
+            return res.status(400).json({
+                error: 'Insuficiente: Precisa de pelo menos 2 times para gerar chaveamento'
+            });
+        }
+
+        console.log(`✅ Found ${registrations.length} approved teams`);
+
+        // 2. Extract team IDs and shuffle (random algorithm)
+        const teamIds = registrations.map((r: any) => r.team_id);
+
+        // Fisher-Yates shuffle
+        for (let i = teamIds.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [teamIds[i], teamIds[j]] = [teamIds[j], teamIds[i]];
+        }
+
+        console.log(`🔀 Shuffled teams:`, teamIds);
+
+        // 3. Pair teams 2-by-2 for Round 1
+        const matches = [];
+        let matchNumber = 1;
+
+        for (let i = 0; i < teamIds.length; i += 2) {
+            const teamA = teamIds[i];
+            const teamB = teamIds[i + 1] || null; // null = BYE
+
+            matches.push({
+                competition_id: Number(id),
+                phase_id: null, // Can be set if phase exists
+                round_number: 1,
+                match_number: matchNumber++,
+                team_a_id: teamA,
+                team_b_id: teamB,
+                status: teamB ? 'SCHEDULED' : 'BYE', // If no opponent, mark as BYE
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            });
+
+            if (teamB) {
+                console.log(`📋 Match ${matchNumber - 1}: Team ${teamA} vs Team ${teamB}`);
+            } else {
+                console.log(`📋 Match ${matchNumber - 1}: Team ${teamA} (BYE - advances automatically)`);
+            }
+        }
+
+        // 4. Delete existing matches and insert new ones
+        await supabase.from('GameMatch').delete().eq('competition_id', Number(id));
+        const { error: insertError } = await supabase.from('GameMatch').insert(matches);
+
+        if (insertError) throw insertError;
+
+        // 5. Update competition status to 'Em andamento'
+        const { error: updateError } = await supabase
+            .from('Competition')
+            .update({
+                status: 'ONGOING',
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', Number(id));
+
+        if (updateError) throw updateError;
+
+        console.log(`✅ Bracket generated successfully with ${matches.length} matches`);
+        console.log(`✅ Competition status updated to ONGOING`);
+
+        res.json({
+            message: 'Chaveamento gerado com sucesso',
+            matches: matches.length,
+            round: 1,
+            teams: teamIds.length,
+            bracket: matches.map(m => ({
+                match_number: m.match_number,
+                team_a_id: m.team_a_id,
+                team_b_id: m.team_b_id,
+                status: m.status
+            }))
+        });
+
+    } catch (error: any) {
+        console.error('❌ Generate Bracket Error:', error.message);
+        res.status(500).json({ error: 'Falha ao gerar chaveamento: ' + error.message });
+    }
+};
