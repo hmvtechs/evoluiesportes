@@ -59,7 +59,7 @@ export const login = async (req: Request, res: Response) => {
 };
 
 /**
- * VALIDATE RF - Valida CPF usando apicpf.com API
+ * VALIDATE RF - Valida CPF usando serviço de validação
  */
 export const validateRF = async (req: Request, res: Response) => {
     const { cpf } = req.body;
@@ -85,7 +85,7 @@ export const validateRF = async (req: Request, res: Response) => {
             return res.status(400).json({
                 valid: false,
                 status: result.status,
-                error: result.error || 'CPF irregular',
+                error: result.error || 'CPF validation service not available',
                 situation: result.situation,
             });
         }
