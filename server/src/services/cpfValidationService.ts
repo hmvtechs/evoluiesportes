@@ -6,6 +6,17 @@ import axios, { AxiosError } from 'axios';
  */
 
 interface CPFAPIResponse {
+    code?: number;
+    status?: number;
+    data?: {
+        cpf?: string;
+        nome?: string;
+        nascimento?: string;
+        data_nascimento?: string;
+        situacao?: string;
+        genero?: string;
+    };
+    // Fallback for flat structure if API changes back
     cpf?: string;
     nome?: string;
     nascimento?: string;
@@ -19,6 +30,7 @@ interface ValidationResult {
     status: string;
     name?: string;
     birthDate?: string;
+    gender?: string;
     situation?: string;
     error?: string;
 }
@@ -75,27 +87,38 @@ class CPFValidationService {
                 }
             );
 
-            const data = response.data;
+            const responseData = response.data as any;
+            console.log('📦 Resposta da API:', JSON.stringify(responseData, null, 2));
+
+            // Normalize data from different possible structures
+            const data = responseData.data || responseData;
+            const nome = data.nome;
+            const situacao = data.situacao;
+            const valido = responseData.valido;
+            const nascimento = data.nascimento || data.data_nascimento;
+            const genero = data.genero;
 
             // Check if CPF is valid based on API response
-            if (data.valido === true || data.situacao?.toLowerCase().includes('regular')) {
-                console.log(`✅ CPF válido: ${data.nome || 'Nome não disponível'}`);
+            // Se retornar nome, consideramos que o CPF existe e é válido para cadastro
+            if (nome || valido === true || situacao?.toLowerCase().includes('regular')) {
+                console.log(`✅ CPF válido/identificado: ${nome || 'Nome não disponível'}`);
 
                 return {
                     valid: true,
-                    status: 'REGULAR',
-                    name: data.nome,
-                    birthDate: data.nascimento,
-                    situation: data.situacao,
+                    status: situacao || 'REGULAR',
+                    name: nome,
+                    birthDate: nascimento,
+                    gender: genero,
+                    situation: situacao || 'CPF identificado na base',
                 };
             } else {
-                console.log(`❌ CPF irregular: ${data.mensagem || data.situacao}`);
+                console.log(`❌ CPF irregular: ${responseData.mensagem || situacao}`);
 
                 return {
                     valid: false,
-                    status: data.situacao || 'IRREGULAR',
-                    error: data.mensagem || 'CPF não está regular',
-                    situation: data.situacao,
+                    status: situacao || 'IRREGULAR',
+                    error: responseData.mensagem || 'CPF não está regular',
+                    situation: situacao,
                 };
             }
 

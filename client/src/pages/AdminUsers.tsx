@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Edit, EyeOff, Loader } from 'lucide-react';
+import { Edit, EyeOff, Loader, Trash2 } from 'lucide-react';
 import { API_BASE_URL } from '../config/api';
 
 interface User {
@@ -87,6 +87,34 @@ const AdminUsers: React.FC = () => {
         } catch (err) {
             console.error('Error obfuscating user:', err);
             alert('❌ Erro de conexão ao anonimizar usuário');
+        }
+    };
+
+    const handleDelete = async (id: string, userName: string) => {
+        if (!confirm(`⚠️ PERIGO: Tem certeza que deseja EXCLUIR o usuário "${userName}"?\n\nEsta ação removerá o usuário do sistema e do banco de dados permanentemente.\n\nEsta ação NÃO pode ser desfeita.`)) {
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_BASE_URL}/api/v1/users/admin/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (res.ok) {
+                alert('✅ Usuário removido com sucesso');
+                fetchUsers(); // Refresh list
+            } else {
+                const data = await res.json();
+                alert('❌ Erro: ' + (data.error || 'Falha ao remover usuário'));
+            }
+        } catch (err) {
+            console.error('Error deleting user:', err);
+            alert('❌ Erro de conexão ao remover usuário');
         }
     };
 
@@ -240,6 +268,14 @@ const AdminUsers: React.FC = () => {
                                                         <EyeOff size={16} />
                                                     </button>
                                                 )}
+                                                <button
+                                                    className="btn-icon"
+                                                    style={{ color: 'var(--danger)' }}
+                                                    onClick={() => handleDelete(user.id, user.full_name)}
+                                                    title="Excluir usuário"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>

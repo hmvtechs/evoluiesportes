@@ -1,0 +1,5 @@
+Testing axios with dns.resolve4...
+Resolving: deqtlplceaphtindxxtu.supabase.co
+Using dns.resolve4 with Google DNS
+Resolved IPs: [ '104.18.38.10', '172.64.149.246' ]
+Error: Invalid IP address: undefined

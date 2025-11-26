@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config/api';
 import { Save, Eye, EyeOff } from 'lucide-react';
@@ -25,6 +25,11 @@ const Register: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+    // Clear validation status when CPF changes
+    useEffect(() => {
+        setRfStatus(null);
+    }, [formData.cpf]);
 
     const validateCPF = (cpf: string) => {
         cpf = cpf.replace(/[^\d]+/g, '');
@@ -89,9 +94,19 @@ const Register: React.FC = () => {
             if (res.ok && data.valid) {
                 setRfStatus('✅ CPF válido');
 
-                // Auto-fill name if returned by API and field is empty
+                // Auto-fill all available data from API
+                const updates: any = {};
                 if (data.name && !formData.full_name) {
-                    setFormData(prev => ({ ...prev, full_name: data.name }));
+                    updates.full_name = data.name;
+                }
+                if (data.birthDate && !formData.birth_date) {
+                    updates.birth_date = data.birthDate;
+                }
+                if (data.gender && !formData.sex) {
+                    updates.sex = data.gender;
+                }
+                if (Object.keys(updates).length > 0) {
+                    setFormData(prev => ({ ...prev, ...updates }));
                 }
             } else if (data.status === 'TIMEOUT') {
                 setRfStatus('⏱️ Timeout ao consultar API. Tente novamente.');
@@ -235,6 +250,7 @@ const Register: React.FC = () => {
                                 <option value="">Selecione</option>
                                 <option value="M">Masculino</option>
                                 <option value="F">Feminino</option>
+                                <option value="I">Indefinido/Outro</option>
                             </select>
                         </div>
                     </div>

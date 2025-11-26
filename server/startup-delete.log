@@ -1,0 +1,40 @@
+--- INICIANDO SUPABASE (CURL MODE) ---
+1. Ambiente: development
+2. URL: https://deqtlplceaphtindxxtu.supabase.co
+3. KEY (Anon): OK
+4. SERVICE_KEY: OK
+Ô£à Supabase inicializado (CURL Fetch)
+Ô£à CPF Validation Service initialized
+Server is running on http://localhost:3000
+
+­ƒîÉ Acesso na rede local:
+   http://192.168.1.108:3000
+   http://172.18.112.1:3000
+
+POST /api/v1/users
+
+=== USER REGISTRATION ATTEMPT (SUPABASE AUTH) ===
+Timestamp: 2025-11-26T14:08:58.801Z
+[curlFetch] Headers: {"Content-Type":"application/json;charset=UTF-8","Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlcXRscGxjZWFwaHRpbmR4eHR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2NTk0NDYsImV4cCI6MjA3OTIzNTQ0Nn0.-TIhsiQoD_RR8fI8D8R1ZrC86WeH0OgXOpFFrnHXlEg","apikey":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlcXRscGxjZWFwaHRpbmR4eHR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2NTk0NDYsImV4cCI6MjA3OTIzNTQ0Nn0.-TIhsiQoD_RR8fI8D8R1ZrC86WeH0OgXOpFFrnHXlEg","X-Client-Info":"supabase-js-node/2.84.0","X-Supabase-Api-Version":"2024-01-01"}
+[curlFetch] Executing: curl -s -i -X POST --resolve deqtlplceaphtindxxtu.supabase.co:443:104.18.38.146 -H "Content-Type: application/json;charset=UTF-8" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3M...
+[curlFetch] Headers: {"accept":"application/vnd.pgrst.object+json","apikey":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlcXRscGxjZWFwaHRpbmR4eHR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2NTk0NDYsImV4cCI6MjA3OTIzNTQ0Nn0.-TIhsiQoD_RR8fI8D8R1ZrC86WeH0OgXOpFFrnHXlEg","authorization":"Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6ImRiemVWUi91ZTlUUjdQcisiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2RlcXRscGxjZWFwaHRpbmR4eHR1LnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiJhNTNlOWZmOC0zOGUyLTQ3NTUtODYxYi1kYzM3NjA0MWEzNTAiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzY0MTY5NzQwLCJpYXQiOjE3NjQxNjYxNDAsImVtYWlsIjoidGVzdF9hZG1pbl8xNzY0MTY2MTM4NzIzXzg3QGV4YW1wbGUuY29tIiwicGhvbmUiOiIiLCJhcHBfbWV0YWRhdGEiOnsicHJvdmlkZXIiOiJlbWFpbCIsInByb3ZpZGVycyI6WyJlbWFpbCJdfSwidXNlcl9tZXRhZGF0YSI6eyJlbWFpbCI6InRlc3RfYWRtaW5fMTc2NDE2NjEzODcyM184N0BleGFtcGxlLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJwaG9uZV92ZXJpZmllZCI6ZmFsc2UsInN1YiI6ImE1M2U5ZmY4LTM4ZTItNDc1NS04NjFiLWRjMzc2MDQxYTM1MCJ9LCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImFhbCI6ImFhbDEiLCJhbXIiOlt7Im1ldGhvZCI6InBhc3N3b3JkIiwidGltZXN0YW1wIjoxNzY0MTY2MTQwfV0sInNlc3Npb25faWQiOiJmNmZiZTNlYy1jMjg3LTQ1NDUtODlmOC00MWE5ODczMDMxM2MiLCJpc19hbm9ueW1vdXMiOmZhbHNlfQ.ngjdEzh2OHd48ymvsYAGSkPC_vDpD00HeJXJpWtm_Bc","content-profile":"public","content-type":"application/json","prefer":"return=representation","x-client-info":"supabase-js-node/2.84.0"}
+[curlFetch] Executing: curl -s -i -X POST --resolve deqtlplceaphtindxxtu.supabase.co:443:104.18.38.146 -H "accept: application/vnd.pgrst.object+json" -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIs...
+Ô£à User created successfully: test_admin_1764166138723_87@example.com
+POST /api/v1/users
+
+=== USER REGISTRATION ATTEMPT (SUPABASE AUTH) ===
+Timestamp: 2025-11-26T14:09:00.910Z
+[curlFetch] Headers: {"Content-Type":"application/json;charset=UTF-8","Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlcXRscGxjZWFwaHRpbmR4eHR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2NTk0NDYsImV4cCI6MjA3OTIzNTQ0Nn0.-TIhsiQoD_RR8fI8D8R1ZrC86WeH0OgXOpFFrnHXlEg","apikey":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlcXRscGxjZWFwaHRpbmR4eHR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2NTk0NDYsImV4cCI6MjA3OTIzNTQ0Nn0.-TIhsiQoD_RR8fI8D8R1ZrC86WeH0OgXOpFFrnHXlEg","X-Client-Info":"supabase-js-node/2.84.0","X-Supabase-Api-Version":"2024-01-01"}
+[curlFetch] Executing: curl -s -i -X POST --resolve deqtlplceaphtindxxtu.supabase.co:443:104.18.38.146 -H "Content-Type: application/json;charset=UTF-8" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3M...
+[curlFetch] Headers: {"accept":"application/vnd.pgrst.object+json","apikey":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlcXRscGxjZWFwaHRpbmR4eHR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2NTk0NDYsImV4cCI6MjA3OTIzNTQ0Nn0.-TIhsiQoD_RR8fI8D8R1ZrC86WeH0OgXOpFFrnHXlEg","authorization":"Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6ImRiemVWUi91ZTlUUjdQcisiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2RlcXRscGxjZWFwaHRpbmR4eHR1LnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiIzMTQwNjJmMS02MmM3LTQ4NGItODI0ZC0yY2MyNGI1NDU0ZGYiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzY0MTY5NzQxLCJpYXQiOjE3NjQxNjYxNDEsImVtYWlsIjoidGVzdF9mYW5fMTc2NDE2NjE0MDkwN182NjdAZXhhbXBsZS5jb20iLCJwaG9uZSI6IiIsImFwcF9tZXRhZGF0YSI6eyJwcm92aWRlciI6ImVtYWlsIiwicHJvdmlkZXJzIjpbImVtYWlsIl19LCJ1c2VyX21ldGFkYXRhIjp7ImVtYWlsIjoidGVzdF9mYW5fMTc2NDE2NjE0MDkwN182NjdAZXhhbXBsZS5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwicGhvbmVfdmVyaWZpZWQiOmZhbHNlLCJzdWIiOiIzMTQwNjJmMS02MmM3LTQ4NGItODI0ZC0yY2MyNGI1NDU0ZGYifSwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJhYWwiOiJhYWwxIiwiYW1yIjpbeyJtZXRob2QiOiJwYXNzd29yZCIsInRpbWVzdGFtcCI6MTc2NDE2NjE0MX1dLCJzZXNzaW9uX2lkIjoiZjMzZjZkMjQtZmE4OS00NDNjLTkxNDgtNzdmMWJiMTJhMDQzIiwiaXNfYW5vbnltb3VzIjpmYWxzZX0.zIyX5tFAnJOXGHlqAIDkFsfDEAC54vjbBYLE-4tRDI0","content-profile":"public","content-type":"application/json","prefer":"return=representation","x-client-info":"supabase-js-node/2.84.0"}
+[curlFetch] Executing: curl -s -i -X POST --resolve deqtlplceaphtindxxtu.supabase.co:443:104.18.38.146 -H "accept: application/vnd.pgrst.object+json" -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIs...
+Ô£à User created successfully: test_fan_1764166140907_667@example.com
+POST /api/v1/auth/login
+
+=== LOGIN (SUPABASE) ===
+[curlFetch] Headers: {"Content-Type":"application/json;charset=UTF-8","Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlcXRscGxjZWFwaHRpbmR4eHR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2NTk0NDYsImV4cCI6MjA3OTIzNTQ0Nn0.-TIhsiQoD_RR8fI8D8R1ZrC86WeH0OgXOpFFrnHXlEg","apikey":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlcXRscGxjZWFwaHRpbmR4eHR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2NTk0NDYsImV4cCI6MjA3OTIzNTQ0Nn0.-TIhsiQoD_RR8fI8D8R1ZrC86WeH0OgXOpFFrnHXlEg","X-Client-Info":"supabase-js-node/2.84.0","X-Supabase-Api-Version":"2024-01-01"}
+[curlFetch] Executing: curl -s -i -X POST --resolve deqtlplceaphtindxxtu.supabase.co:443:104.18.38.146 -H "Content-Type: application/json;charset=UTF-8" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3M...
+Ô£à Login bem sucedido: test_admin_1764166138723_87@example.com
+DELETE /api/v1/users/admin/314062f1-62c7-484b-824d-2cc24b5454df
+[curlFetch] Headers: {"Authorization":"Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6ImRiemVWUi91ZTlUUjdQcisiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2RlcXRscGxjZWFwaHRpbmR4eHR1LnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiJhNTNlOWZmOC0zOGUyLTQ3NTUtODYxYi1kYzM3NjA0MWEzNTAiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzY0MTY5NzQyLCJpYXQiOjE3NjQxNjYxNDIsImVtYWlsIjoidGVzdF9hZG1pbl8xNzY0MTY2MTM4NzIzXzg3QGV4YW1wbGUuY29tIiwicGhvbmUiOiIiLCJhcHBfbWV0YWRhdGEiOnsicHJvdmlkZXIiOiJlbWFpbCIsInByb3ZpZGVycyI6WyJlbWFpbCJdfSwidXNlcl9tZXRhZGF0YSI6eyJlbWFpbCI6InRlc3RfYWRtaW5fMTc2NDE2NjEzODcyM184N0BleGFtcGxlLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJwaG9uZV92ZXJpZmllZCI6ZmFsc2UsInN1YiI6ImE1M2U5ZmY4LTM4ZTItNDc1NS04NjFiLWRjMzc2MDQxYTM1MCJ9LCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImFhbCI6ImFhbDEiLCJhbXIiOlt7Im1ldGhvZCI6InBhc3N3b3JkIiwidGltZXN0YW1wIjoxNzY0MTY2MTQyfV0sInNlc3Npb25faWQiOiI5MjFjMzcxNy1hNTI0LTQ2NzYtODMwZC0xZjI5OWY4ZTkwYjkiLCJpc19hbm9ueW1vdXMiOmZhbHNlfQ.1UXAkuXQITZY9A91_cu0TXVXhcL7FCgAklBue3IDrFk","apikey":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlcXRscGxjZWFwaHRpbmR4eHR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2NTk0NDYsImV4cCI6MjA3OTIzNTQ0Nn0.-TIhsiQoD_RR8fI8D8R1ZrC86WeH0OgXOpFFrnHXlEg","X-Client-Info":"supabase-js-node/2.84.0","X-Supabase-Api-Version":"2024-01-01"}
+[curlFetch] Executing: curl -s -i -X GET --resolve deqtlplceaphtindxxtu.supabase.co:443:104.18.38.146 -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6ImRiemVWUi91ZTlUUjdQcisiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2Rl...

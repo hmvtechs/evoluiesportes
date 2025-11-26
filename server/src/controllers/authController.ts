@@ -78,6 +78,7 @@ export const validateRF = async (req: Request, res: Response) => {
                 status: result.status,
                 name: result.name,
                 birthDate: result.birthDate,
+                gender: result.gender,
                 situation: result.situation,
             });
         } else {

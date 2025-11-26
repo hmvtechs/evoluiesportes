@@ -1,0 +1,17 @@
+­ƒñû Starting Admin User Deletion Test
+-------------------------------------------
+
+1. Registering Admin: test_admin_1764166031989_83@example.com
+Ô£à Admin Registered
+
+2. Registering Victim: test_fan_1764166033185_337@example.com
+Ô£à Victim Registered (ID: fae8b755-4d9b-4608-91e6-d5ca8a9bf9b8)
+
+3. Logging in Admin...
+Ô£à Admin Logged In (Token received)
+
+4. Deleting Victim (ID: fae8b755-4d9b-4608-91e6-d5ca8a9bf9b8)...
+
+ÔØî TEST FAILED
+Status: 404
+Data: "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot DELETE /api/v1/users/admin/fae8b755-4d9b-4608-91e6-d5ca8a9bf9b8</pre>\n</body>\n</html>\n"

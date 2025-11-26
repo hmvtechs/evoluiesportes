@@ -1,0 +1,24 @@
+--- INICIANDO SUPABASE (CURL MODE) ---
+1. Ambiente: development
+2. URL: https://deqtlplceaphtindxxtu.supabase.co
+3. KEY (Anon): OK
+4. SERVICE_KEY: OK
+Ô£à Supabase inicializado (CURL Fetch)
+Ô£à CPF Validation Service initialized
+Server is running on http://localhost:3000
+
+­ƒîÉ Acesso na rede local:
+   http://192.168.1.108:3000
+   http://172.18.112.1:3000
+
+POST /api/v1/users
+
+=== USER REGISTRATION ATTEMPT (SUPABASE AUTH) ===
+Timestamp: 2025-11-25T23:37:38.983Z
+[curlFetch] Executing: curl -s -i -X POST --resolve deqtlplceaphtindxxtu.supabase.co:443:104.18.38.146 -H "Content-Type: application/json;charset=UTF-8" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3M...
+[curlFetch] Executing: curl -s -i -X POST --resolve deqtlplceaphtindxxtu.supabase.co:443:104.18.38.146 -d "{\"id\":\"137e7b1c-15a6-4c1d-95c4-56de20722314\",\"email\":\"novousuario@example.com\",\"cpf\":\"12345678900\",\"ful...
+Error creating user profile: {
+  message: 'No API key found in request',
+  hint: 'No `apikey` request header or url param was found.'
+}
+[curlFetch] Executing: curl -s -i -X DELETE --resolve deqtlplceaphtindxxtu.supabase.co:443:104.18.38.146 -H "Content-Type: application/json;charset=UTF-8" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc...

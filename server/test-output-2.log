@@ -1,0 +1,18 @@
+Testing fetch...
+Resolving: deqtlplceaphtindxxtu.supabase.co
+Resolved IPs: [ '172.64.149.246', '104.18.38.10' ]
+Error: FetchError: request to https://deqtlplceaphtindxxtu.supabase.co/ failed, reason: Invalid IP address: undefined
+    at ClientRequest.<anonymous> (C:\Users\Luis\Documents\EvoluiGest├úo\server\node_modules\node-fetch\lib\index.js:1501:11)
+    at ClientRequest.emit (node:events:508:28)
+    at ClientRequest.emit (node:domain:489:12)
+    at emitErrorEvent (node:_http_client:108:11)
+    at TLSSocket.socketErrorListener (node:_http_client:575:5)
+    at TLSSocket.emit (node:events:508:28)
+    at TLSSocket.emit (node:domain:489:12)
+    at emitErrorNT (node:internal/streams/destroy:170:8)
+    at emitErrorCloseNT (node:internal/streams/destroy:129:3)
+    at processTicksAndRejections (node:internal/process/task_queues:89:21) {
+  type: 'system',
+  errno: 'ERR_INVALID_IP_ADDRESS',
+  code: 'ERR_INVALID_IP_ADDRESS'
+}

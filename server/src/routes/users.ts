@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { register, updateProfile, updateAdminUser, obfuscateUser, getAdminDashboard, getUsers, getDashboard, searchUsers } from '../controllers/userController';
+import { register, updateProfile, updateAdminUser, obfuscateUser, getAdminDashboard, getUsers, getDashboard, searchUsers, deleteUser } from '../controllers/userController';
 import { authorize } from '../middleware/authorize';
 // Assuming we have an authentication middleware that populates req.user. 
 // For this prototype, we'll assume a mock middleware or that the controller handles it, 
@@ -24,5 +24,6 @@ router.patch('/admin/:id', authenticate, authorize(['ADMIN']), updateAdminUser);
 router.post('/admin/:id/obfuscate', authenticate, authorize(['ADMIN']), obfuscateUser);
 router.get('/admin/dashboard', authenticate, authorize(['ADMIN']), getAdminDashboard);
 router.get('/admin/users', authenticate, authorize(['ADMIN']), getUsers);
+router.delete('/admin/:id', authenticate, authorize(['ADMIN']), deleteUser);
 
 export default router;

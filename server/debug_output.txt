@@ -1,0 +1,14 @@
+--- DEBUG CPF API ---
+CPF: 10362896640
+API Key configured: true
+Requesting: https://apicpf.com/api/consulta
+Status: 200
+Data: {
+  "code": 200,
+  "data": {
+    "cpf": "10362896640",
+    "nome": "Paulo Henrique Mendes Veloso",
+    "genero": "M",
+    "data_nascimento": "1989-11-18"
+  }
+}

@@ -1,0 +1,12 @@
+{
+    "email": "novousuario3@example.com",
+    "cpf": "12345678902",
+    "password": "senha123",
+    "full_name": "Novo Usuario Teste 3",
+    "phone": "11999999999",
+    "sex": "M",
+    "birth_date": "1990-01-01",
+    "city": "São Paulo",
+    "state": "SP",
+    "role": "FAN"
+}
