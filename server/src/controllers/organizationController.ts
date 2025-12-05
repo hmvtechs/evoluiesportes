@@ -69,23 +69,17 @@ export const createOrganization = async (req: Request, res: Response) => {
     }
 
     try {
-        // Debug logging
-        console.log('[createOrganization] req.user:', (req as any).user);
-        console.log('[createOrganization] manager_user_id from body:', manager_user_id);
+        // manager_user_id is now OPTIONAL - use provided value, authenticated user, or null
+        const managerId = manager_user_id || (req as any).user?.userId || null;
 
-        // Use provided manager_user_id or fall back to authenticated user
-        const managerId = manager_user_id || (req as any).user?.userId;
-
-        if (!managerId) {
-            return res.status(400).json({ error: 'manager_user_id is required (login required)' });
-        }
+        console.log('[createOrganization] Creating org with managerId:', managerId);
 
         const { data: organization, error } = await (supabaseAdmin || supabase)
             .from('Organization')
             .insert([{
                 name_official,
                 cnpj: cnpj || null,
-                manager_user_id: managerId,
+                manager_user_id: managerId, // Can be null now
                 team_manager_name: team_manager_name || null,
                 team_manager_contact: team_manager_contact || null,
                 coach_name: coach_name || null,
