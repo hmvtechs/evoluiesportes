@@ -1,0 +1,30 @@
+Connecting to database to reload schema cache...
+Error reloading schema: error: password authentication failed for user "postgres"
+    at Parser.parseErrorMessage (C:\Users\Luis\Documents\EvoluiGest├úo\server\node_modules\pg-protocol\src\parser.ts:369:69)
+    at Parser.handlePacket (C:\Users\Luis\Documents\EvoluiGest├úo\server\node_modules\pg-protocol\src\parser.ts:187:21)
+    at Parser.parse (C:\Users\Luis\Documents\EvoluiGest├úo\server\node_modules\pg-protocol\src\parser.ts:102:30)
+    at TLSSocket.<anonymous> (C:\Users\Luis\Documents\EvoluiGest├úo\server\node_modules\pg-protocol\src\index.ts:7:48)
+    at TLSSocket.emit (node:events:508:28)
+    at TLSSocket.emit (node:domain:489:12)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at TLSSocket.Readable.push (node:internal/streams/readable:390:5)
+    at TLSWrap.onStreamRead (node:internal/stream_base_commons:189:23) {
+  length: 78,
+  severity: 'FATAL',
+  code: '28P01',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}

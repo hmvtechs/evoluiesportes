@@ -1,0 +1,45 @@
+--- INICIANDO SUPABASE (CURL MODE) ---
+1. Ambiente: development
+2. URL: https://deqtlplceaphtindxxtu.supabase.co
+3. KEY (Anon): OK
+4. SERVICE_KEY: OK
+Ô£à Supabase inicializado (CURL Fetch)
+Ô£à CPF Validation Service initialized (apicpf.com + local fallback)
+Server is running on http://localhost:3001
+
+­ƒîÉ Acesso na rede local:
+   http://192.168.1.101:3001
+   http://192.168.64.1:3001
+
+POST /api/v1/auth/login
+
+=== LOGIN (SUPABASE) ===
+ÔØî Erro Login: TypeError: Cannot read properties of undefined (reading 'includes')
+    at login (C:\Users\Luis\Documents\EvoluiGest├úo\server\src\controllers\authController.ts:16:25)
+    at Layer.handle [as handle_request] (C:\Users\Luis\Documents\EvoluiGest├úo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\Luis\Documents\EvoluiGest├úo\server\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\Luis\Documents\EvoluiGest├úo\server\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\Luis\Documents\EvoluiGest├úo\server\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\Luis\Documents\EvoluiGest├úo\server\node_modules\express\lib\router\index.js:284:15
+    at router.process_params (C:\Users\Luis\Documents\EvoluiGest├úo\server\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\Luis\Documents\EvoluiGest├úo\server\node_modules\express\lib\router\index.js:280:10)
+    at router.handle (C:\Users\Luis\Documents\EvoluiGest├úo\server\node_modules\express\lib\router\index.js:175:3)
+    at router (C:\Users\Luis\Documents\EvoluiGest├úo\server\node_modules\express\lib\router\index.js:47:12)
+POST /api/v1/auth/login
+
+=== LOGIN (SUPABASE) ===
+Ô£à Login bem sucedido: test@test.com
+POST /api/v1/organizations
+[createOrganization] req.user: {
+  userId: '9e16dbe6-ee16-4073-a8c5-0f9978b34485',
+  email: 'test@test.com',
+  role: 'USER'
+}
+[createOrganization] manager_user_id from body: undefined
+POST /api/v1/competitions/9/register-team
+­ƒÅÉ [registerTeam] Competition ID: 9, Organization ID: 59
+Ô£à [registerTeam] Competition: Mineiro
+­ƒåò [registerTeam] Creating new Team record...
+Ô£à [registerTeam] Created new Team ID: 22
+­ƒôØ [registerTeam] Creating TeamRegistration...
+Ô£à [registerTeam] Registration created successfully: 58

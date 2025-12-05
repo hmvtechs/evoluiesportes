@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Building2, Edit2, Save, X, Plus, Trash2 } from 'lucide-react';
+import { Building2, Edit2, Save, X, Plus, Trash2, Check } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { API_BASE_URL } from '../config/api';
+import { IOSCard, IOSButton, IOSInput } from '../components/ui/IOSDesign';
 
 interface Organization {
     id: number;
     name_official: string;
     cnpj: string;
     manager_user_id: string | null;
+    team_manager_name?: string;
+    team_manager_contact?: string;
+    coach_name?: string;
+    coach_contact?: string;
 }
 
 const AdminOrganizations: React.FC = () => {
@@ -17,9 +22,17 @@ const AdminOrganizations: React.FC = () => {
     const [editingId, setEditingId] = useState<number | null>(null);
     const [editName, setEditName] = useState('');
     const [editCnpj, setEditCnpj] = useState('');
+    const [editTeamManager, setEditTeamManager] = useState('');
+    const [editTeamContact, setEditTeamContact] = useState('');
+    const [editCoach, setEditCoach] = useState('');
+    const [editCoachContact, setEditCoachContact] = useState('');
     const [showNewForm, setShowNewForm] = useState(false);
     const [newName, setNewName] = useState('');
     const [newCnpj, setNewCnpj] = useState('');
+    const [newTeamManager, setNewTeamManager] = useState('');
+    const [newTeamContact, setNewTeamContact] = useState('');
+    const [newCoach, setNewCoach] = useState('');
+    const [newCoachContact, setNewCoachContact] = useState('');
 
     useEffect(() => {
         fetchOrganizations();
@@ -45,12 +58,20 @@ const AdminOrganizations: React.FC = () => {
         setEditingId(org.id);
         setEditName(org.name_official);
         setEditCnpj(org.cnpj);
+        setEditTeamManager(org.team_manager_name || '');
+        setEditTeamContact(org.team_manager_contact || '');
+        setEditCoach(org.coach_name || '');
+        setEditCoachContact(org.coach_contact || '');
     };
 
     const handleCancelEdit = () => {
         setEditingId(null);
         setEditName('');
         setEditCnpj('');
+        setEditTeamManager('');
+        setEditTeamContact('');
+        setEditCoach('');
+        setEditCoachContact('');
     };
 
     const handleSaveEdit = async (id: number) => {
@@ -63,7 +84,11 @@ const AdminOrganizations: React.FC = () => {
                 },
                 body: JSON.stringify({
                     name_official: editName,
-                    cnpj: editCnpj
+                    cnpj: editCnpj,
+                    team_manager_name: editTeamManager,
+                    team_manager_contact: editTeamContact,
+                    coach_name: editCoach,
+                    coach_contact: editCoachContact
                 })
             });
 
@@ -95,7 +120,11 @@ const AdminOrganizations: React.FC = () => {
                 },
                 body: JSON.stringify({
                     name_official: newName,
-                    cnpj: newCnpj || '00.000.000/0000-00'
+                    cnpj: newCnpj || null,
+                    team_manager_name: newTeamManager || null,
+                    team_manager_contact: newTeamContact || null,
+                    coach_name: newCoach || null,
+                    coach_contact: newCoachContact || null
                 })
             });
 
@@ -105,6 +134,10 @@ const AdminOrganizations: React.FC = () => {
                 setShowNewForm(false);
                 setNewName('');
                 setNewCnpj('');
+                setNewTeamManager('');
+                setNewTeamContact('');
+                setNewCoach('');
+                setNewCoachContact('');
             } else {
                 alert('❌ Erro ao criar organização');
             }
@@ -138,178 +171,109 @@ const AdminOrganizations: React.FC = () => {
     };
 
     if (loading) {
-        return <div style={{ padding: '2rem' }}>Carregando...</div>;
+        return <div style={{ padding: '4rem', textAlign: 'center', color: '#8E8E93' }}>Carregando...</div>;
     }
 
     return (
         <div className="animate-fade-in" style={{ maxWidth: '1000px', margin: '0 auto', padding: '2rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <Building2 size={32} />
-                    <h1 style={{ margin: 0 }}>Gerenciar Organizações</h1>
+                <div>
+                    <h1 style={{ fontSize: '34px', fontWeight: 800, margin: 0 }}>Organizações</h1>
+                    <p style={{ color: '#8E8E93', fontSize: '15px', marginTop: '0.5rem' }}>
+                        Gerencie clubes e entidades
+                    </p>
                 </div>
-                <button
-                    className="btn-primary"
-                    onClick={() => setShowNewForm(!showNewForm)}
-                >
-                    <Plus size={16} />
-                    Nova Organização
-                </button>
+                <IOSButton onClick={() => setShowNewForm(!showNewForm)}>
+                    <Plus size={18} /> Nova
+                </IOSButton>
             </div>
 
             {showNewForm && (
-                <div className="card" style={{ marginBottom: '2rem', padding: '1.5rem' }}>
-                    <h3 style={{ marginTop: 0 }}>Nova Organização</h3>
+                <IOSCard style={{ marginBottom: '2rem', border: '1px solid #0A84FF' }}>
+                    <h3 style={{ marginTop: 0, marginBottom: '1.5rem', fontSize: '20px', fontWeight: 700 }}>Nova Organização</h3>
                     <div style={{ display: 'grid', gap: '1rem' }}>
                         <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>
-                                Nome Oficial <span style={{ color: 'var(--danger)' }}>*</span>
-                            </label>
-                            <input
-                                type="text"
-                                className="input"
-                                value={newName}
-                                onChange={(e) => setNewName(e.target.value)}
-                                placeholder="Ex: Clube Atlético Mineiro"
-                            />
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '13px', color: '#8E8E93' }}>Nome Oficial *</label>
+                            <IOSInput value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Ex: Clube Atlético Mineiro" />
                         </div>
                         <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>
-                                CNPJ
-                            </label>
-                            <input
-                                type="text"
-                                className="input"
-                                value={newCnpj}
-                                onChange={(e) => setNewCnpj(e.target.value)}
-                                placeholder="00.000.000/0000-00"
-                            />
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '13px', color: '#8E8E93' }}>CNPJ</label>
+                            <IOSInput value={newCnpj} onChange={(e) => setNewCnpj(e.target.value)} placeholder="00.000.000/0000-00" />
                         </div>
-                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-                            <button
-                                className="btn-secondary"
-                                onClick={() => {
-                                    setShowNewForm(false);
-                                    setNewName('');
-                                    setNewCnpj('');
-                                }}
-                            >
-                                <X size={16} />
-                                Cancelar
-                            </button>
-                            <button
-                                className="btn-primary"
-                                onClick={handleCreate}
-                            >
-                                <Save size={16} />
-                                Criar
-                            </button>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '13px', color: '#8E8E93' }}>Responsável</label>
+                                <IOSInput value={newTeamManager} onChange={(e) => setNewTeamManager(e.target.value)} placeholder="Nome" />
+                            </div>
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '13px', color: '#8E8E93' }}>Contato</label>
+                                <IOSInput value={newTeamContact} onChange={(e) => setNewTeamContact(e.target.value)} placeholder="Tel/Email" />
+                            </div>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '13px', color: '#8E8E93' }}>Treinador</label>
+                                <IOSInput value={newCoach} onChange={(e) => setNewCoach(e.target.value)} placeholder="Nome" />
+                            </div>
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '13px', color: '#8E8E93' }}>Contato</label>
+                                <IOSInput value={newCoachContact} onChange={(e) => setNewCoachContact(e.target.value)} placeholder="Tel/Email" />
+                            </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
+                            <IOSButton variant="secondary" onClick={() => setShowNewForm(false)}>Cancelar</IOSButton>
+                            <IOSButton onClick={handleCreate}>Criar Organização</IOSButton>
                         </div>
                     </div>
-                </div>
+                </IOSCard>
             )}
 
-            <div className="card">
+            <div style={{ display: 'grid', gap: '1rem' }}>
                 {organizations.length === 0 ? (
-                    <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>
+                    <div style={{ textAlign: 'center', color: '#8E8E93', padding: '4rem' }}>
                         Nenhuma organização cadastrada
-                    </p>
+                    </div>
                 ) : (
-                    <table style={{ width: '100%' }}>
-                        <thead>
-                            <tr style={{ borderBottom: '2px solid var(--surface-light)' }}>
-                                <th style={{ padding: '0.75rem', textAlign: 'left' }}>ID</th>
-                                <th style={{ padding: '0.75rem', textAlign: 'left' }}>Nome Oficial</th>
-                                <th style={{ padding: '0.75rem', textAlign: 'left' }}>CNPJ</th>
-                                <th style={{ padding: '0.75rem', textAlign: 'center' }}>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {organizations.map(org => (
-                                <tr key={org.id} style={{ borderBottom: '1px solid var(--surface-light)' }}>
-                                    <td style={{ padding: '0.75rem' }}>{org.id}</td>
-                                    <td style={{ padding: '0.75rem' }}>
-                                        {editingId === org.id ? (
-                                            <input
-                                                type="text"
-                                                className="input"
-                                                value={editName}
-                                                onChange={(e) => setEditName(e.target.value)}
-                                                style={{ width: '100%' }}
-                                            />
-                                        ) : (
-                                            <strong>{org.name_official}</strong>
-                                        )}
-                                    </td>
-                                    <td style={{ padding: '0.75rem' }}>
-                                        {editingId === org.id ? (
-                                            <input
-                                                type="text"
-                                                className="input"
-                                                value={editCnpj}
-                                                onChange={(e) => setEditCnpj(e.target.value)}
-                                                style={{ width: '100%' }}
-                                            />
-                                        ) : (
-                                            org.cnpj
-                                        )}
-                                    </td>
-                                    <td style={{ padding: '0.75rem' }}>
-                                        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
-                                            {editingId === org.id ? (
-                                                <>
-                                                    <button
-                                                        className="btn-primary"
-                                                        onClick={() => handleSaveEdit(org.id)}
-                                                        style={{ fontSize: '0.875rem', padding: '0.5rem 1rem' }}
-                                                    >
-                                                        <Save size={14} />
-                                                        Salvar
-                                                    </button>
-                                                    <button
-                                                        className="btn-secondary"
-                                                        onClick={handleCancelEdit}
-                                                        style={{ fontSize: '0.875rem', padding: '0.5rem 1rem' }}
-                                                    >
-                                                        <X size={14} />
-                                                        Cancelar
-                                                    </button>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <button
-                                                        className="btn-secondary"
-                                                        onClick={() => handleStartEdit(org)}
-                                                        style={{ fontSize: '0.875rem', padding: '0.5rem 1rem' }}
-                                                    >
-                                                        <Edit2 size={14} />
-                                                        Editar
-                                                    </button>
-                                                    <button
-                                                        className="btn-danger"
-                                                        onClick={() => handleDelete(org.id, org.name_official)}
-                                                        style={{ fontSize: '0.875rem', padding: '0.5rem 1rem' }}
-                                                    >
-                                                        <Trash2 size={14} />
-                                                    </button>
-                                                </>
-                                            )}
+                    organizations.map(org => (
+                        <IOSCard key={org.id} style={{ padding: '1.5rem' }}>
+                            {editingId === org.id ? (
+                                <div style={{ display: 'grid', gap: '1rem' }}>
+                                    <IOSInput value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="Nome Oficial" />
+                                    <IOSInput value={editCnpj} onChange={(e) => setEditCnpj(e.target.value)} placeholder="CNPJ" />
+                                    <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
+                                        <IOSButton variant="secondary" onClick={handleCancelEdit}>Cancelar</IOSButton>
+                                        <IOSButton onClick={() => handleSaveEdit(org.id)}>Salvar</IOSButton>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                        <div style={{
+                                            width: '48px', height: '48px', borderRadius: '12px',
+                                            background: 'rgba(255,255,255,0.1)',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            color: 'white', fontWeight: 'bold', fontSize: '18px'
+                                        }}>
+                                            {org.name_official.charAt(0).toUpperCase()}
                                         </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                                        <div>
+                                            <div style={{ fontWeight: 700, fontSize: '17px', color: 'white' }}>{org.name_official}</div>
+                                            <div style={{ fontSize: '14px', color: '#8E8E93' }}>{org.cnpj || 'Sem CNPJ'}</div>
+                                        </div>
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                        <IOSButton variant="secondary" onClick={() => handleStartEdit(org)} style={{ padding: '8px' }}>
+                                            <Edit2 size={16} />
+                                        </IOSButton>
+                                        <IOSButton variant="danger" onClick={() => handleDelete(org.id, org.name_official)} style={{ padding: '8px' }}>
+                                            <Trash2 size={16} />
+                                        </IOSButton>
+                                    </div>
+                                </div>
+                            )}
+                        </IOSCard>
+                    ))
                 )}
-            </div>
-
-            <div className="card" style={{ marginTop: '2rem', padding: '1.5rem', background: 'var(--warning-bg)', border: '1px solid var(--warning)' }}>
-                <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--warning)' }}>⚠️ Importante</h4>
-                <ul style={{ margin: 0, paddingLeft: '1.5rem', color: 'var(--text)' }}>
-                    <li>Alterar o nome de uma organização afetará TODOS os times e competições associados</li>
-                    <li>As mudanças aparecem IMEDIATAMENTE após salvar</li>
-                    <li>Exclua organizações apenas se não tiverem times associados</li>
-                </ul>
             </div>
         </div>
     );

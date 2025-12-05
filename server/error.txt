@@ -1,0 +1,1 @@
+Error syncing to public.User: new row for relation "User" violates check constraint "User_role_check"

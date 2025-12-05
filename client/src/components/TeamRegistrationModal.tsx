@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { X, Search, Plus, ArrowLeft } from 'lucide-react';
+import { Search, Plus, ArrowLeft, RefreshCw, Check } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { API_BASE_URL } from '../config/api';
+import { IOSModal, IOSButton, IOSInput } from './ui/IOSDesign';
 
 interface Organization {
     id: number;
@@ -9,6 +10,7 @@ interface Organization {
     name_short?: string;
     type?: string;
     cnpj?: string;
+    logo_url?: string;
 }
 
 interface TeamRegistrationModalProps {
@@ -25,12 +27,18 @@ const TeamRegistrationModal: React.FC<TeamRegistrationModalProps> = ({ competiti
     const [selectedOrgId, setSelectedOrgId] = useState<number | null>(null);
     const [loading, setLoading] = useState(false);
     const [submitting, setSubmitting] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
 
     // Create Organization State
     const [isCreating, setIsCreating] = useState(false);
     const [newOrgData, setNewOrgData] = useState({
         name_official: '',
-        cnpj: ''
+        cnpj: '',
+        team_manager_name: '',
+        team_manager_contact: '',
+        coach_name: '',
+        coach_contact: '',
+        logo_url: ''
     });
 
     useEffect(() => {
@@ -54,7 +62,7 @@ const TeamRegistrationModal: React.FC<TeamRegistrationModalProps> = ({ competiti
     const fetchOrganizations = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`${API_BASE_URL}/api/v1/organizations`, {
+            const response = await fetch(`${API_BASE_URL}/api/v1/organizations?t=${Date.now()}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (response.ok) {
@@ -89,8 +97,17 @@ const TeamRegistrationModal: React.FC<TeamRegistrationModalProps> = ({ competiti
             if (response.ok) {
                 const newOrg = await response.json();
                 setIsCreating(false);
-                setNewOrgData({ name_official: '', cnpj: '' });
+                setNewOrgData({
+                    name_official: '',
+                    cnpj: '',
+                    team_manager_name: '',
+                    team_manager_contact: '',
+                    coach_name: '',
+                    coach_contact: '',
+                    logo_url: ''
+                });
                 // Refresh list and select the new org
+                setSearchTerm(''); // Clear search to ensure new org is visible
                 await fetchOrganizations();
                 setSelectedOrgId(newOrg.id);
             } else {
@@ -103,6 +120,12 @@ const TeamRegistrationModal: React.FC<TeamRegistrationModalProps> = ({ competiti
         } finally {
             setSubmitting(false);
         }
+    };
+
+    const handleRefresh = async () => {
+        setRefreshing(true);
+        await fetchOrganizations();
+        setRefreshing(false);
     };
 
     const handleSubmit = async () => {
@@ -119,7 +142,10 @@ const TeamRegistrationModal: React.FC<TeamRegistrationModalProps> = ({ competiti
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ team_id: selectedOrgId })
+                body: JSON.stringify({
+                    organization_id: selectedOrgId,
+                    category: 'Principal' // Default category, could be made dynamic
+                })
             });
 
             if (response.ok) {
@@ -137,218 +163,256 @@ const TeamRegistrationModal: React.FC<TeamRegistrationModalProps> = ({ competiti
     };
 
     return (
-        <div
-            style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background: 'rgba(0, 0, 0, 0.5)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                zIndex: 1000,
-                padding: '1rem'
-            }}
-            onClick={onClose}
+        <IOSModal
+            isOpen={true}
+            onClose={onClose}
+            title={isCreating ? 'Nova Organização' : 'Inscrever Time'}
         >
-            <div
-                className="card animate-fade-in"
-                style={{
-                    maxWidth: '500px',
-                    width: '100%',
-                    maxHeight: '80vh',
-                    display: 'flex',
-                    flexDirection: 'column'
-                }}
-                onClick={(e) => e.stopPropagation()}
-            >
-                {/* Header */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        {isCreating && (
-                            <button className="btn-icon" onClick={() => setIsCreating(false)} style={{ width: '32px', height: '32px' }}>
-                                <ArrowLeft size={16} />
-                            </button>
-                        )}
-                        <h3 style={{ margin: 0 }}>{isCreating ? 'Nova Organização' : 'Inscrever Time'}</h3>
+            {isCreating ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <IOSButton variant="secondary" onClick={() => setIsCreating(false)} style={{ alignSelf: 'flex-start', marginBottom: '0.5rem' }}>
+                        <ArrowLeft size={16} /> Voltar
+                    </IOSButton>
+
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '14px', color: '#8E8E93' }}>Nome Oficial *</label>
+                        <IOSInput
+                            value={newOrgData.name_official}
+                            onChange={(e) => setNewOrgData({ ...newOrgData, name_official: e.target.value })}
+                            placeholder="Ex: Esporte Clube Exemplo"
+                        />
                     </div>
-                    <button
-                        onClick={onClose}
-                        className="btn-icon"
-                        style={{ width: '32px', height: '32px' }}
-                    >
-                        <X size={16} />
-                    </button>
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '14px', color: '#8E8E93' }}>CNPJ (opcional)</label>
+                        <IOSInput
+                            value={newOrgData.cnpj}
+                            onChange={(e) => setNewOrgData({ ...newOrgData, cnpj: e.target.value })}
+                            placeholder="00.000.000/0000-00"
+                        />
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '14px', color: '#8E8E93' }}>Responsável</label>
+                            <IOSInput
+                                value={newOrgData.team_manager_name}
+                                onChange={(e) => setNewOrgData({ ...newOrgData, team_manager_name: e.target.value })}
+                                placeholder="Nome"
+                            />
+                        </div>
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '14px', color: '#8E8E93' }}>Contato</label>
+                            <IOSInput
+                                value={newOrgData.team_manager_contact}
+                                onChange={(e) => setNewOrgData({ ...newOrgData, team_manager_contact: e.target.value })}
+                                placeholder="Tel/Email"
+                            />
+                        </div>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '14px', color: '#8E8E93' }}>Treinador</label>
+                            <IOSInput
+                                value={newOrgData.coach_name}
+                                onChange={(e) => setNewOrgData({ ...newOrgData, coach_name: e.target.value })}
+                                placeholder="Nome"
+                            />
+                        </div>
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '14px', color: '#8E8E93' }}>Contato</label>
+                            <IOSInput
+                                value={newOrgData.coach_contact}
+                                onChange={(e) => setNewOrgData({ ...newOrgData, coach_contact: e.target.value })}
+                                placeholder="Tel/Email"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Logo URL Field */}
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '14px', color: '#8E8E93' }}>URL do Logo (opcional)</label>
+                        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                            <IOSInput
+                                value={newOrgData.logo_url}
+                                onChange={(e) => setNewOrgData({ ...newOrgData, logo_url: e.target.value })}
+                                placeholder="https://exemplo.com/logo.png"
+                                style={{ flex: 1 }}
+                            />
+                            {newOrgData.logo_url && (
+                                <img
+                                    src={newOrgData.logo_url}
+                                    alt="Preview"
+                                    style={{
+                                        width: '40px', height: '40px', borderRadius: '8px',
+                                        objectFit: 'cover', border: '1px solid rgba(255,255,255,0.2)'
+                                    }}
+                                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                />
+                            )}
+                        </div>
+                    </div>
+
+                    <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+                        <IOSButton variant="secondary" onClick={() => setIsCreating(false)} disabled={submitting}>
+                            Cancelar
+                        </IOSButton>
+                        <IOSButton onClick={handleCreateOrganization} disabled={submitting}>
+                            {submitting ? 'Criando...' : 'Criar Organização'}
+                        </IOSButton>
+                    </div>
                 </div>
-
-                {isCreating ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1, overflowY: 'auto' }}>
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem' }}>Nome Oficial *</label>
-                            <input
+            ) : (
+                <>
+                    {/* Search and Add */}
+                    <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                        <div style={{ position: 'relative', flex: 1 }}>
+                            <Search
+                                size={18}
+                                style={{
+                                    position: 'absolute',
+                                    left: '12px',
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    color: '#8E8E93'
+                                }}
+                            />
+                            <IOSInput
                                 type="text"
-                                className="input"
-                                value={newOrgData.name_official}
-                                onChange={(e) => setNewOrgData({ ...newOrgData, name_official: e.target.value })}
-                                placeholder="Ex: Esporte Clube Exemplo"
+                                placeholder="Buscar organização..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                style={{ paddingLeft: '38px' }}
                             />
                         </div>
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem' }}>CNPJ *</label>
-                            <input
-                                type="text"
-                                className="input"
-                                value={newOrgData.cnpj}
-                                onChange={(e) => setNewOrgData({ ...newOrgData, cnpj: e.target.value })}
-                                placeholder="00.000.000/0000-00"
-                            />
-                        </div>
-                        <div style={{ marginTop: 'auto', paddingTop: '1.5rem', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-                            <button className="btn btn-secondary" onClick={() => setIsCreating(false)} disabled={submitting}>
-                                Cancelar
-                            </button>
-                            <button className="btn btn-primary" onClick={handleCreateOrganization} disabled={submitting}>
-                                {submitting ? 'Criando...' : 'Criar Organização'}
-                            </button>
-                        </div>
-                    </div>
-                ) : (
-                    <>
-                        {/* Search and Add */}
-                        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
-                            <div style={{ position: 'relative', flex: 1 }}>
-                                <Search
-                                    size={18}
-                                    style={{
-                                        position: 'absolute',
-                                        left: '0.75rem',
-                                        top: '50%',
-                                        transform: 'translateY(-50%)',
-                                        color: 'var(--text-muted)'
-                                    }}
-                                />
-                                <input
-                                    type="text"
-                                    placeholder="Buscar organização..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.75rem 0.75rem 0.75rem 2.5rem',
-                                        border: '1px solid var(--surface-light)',
-                                        borderRadius: 'var(--radius)',
-                                        background: 'var(--surface-light)',
-                                        color: 'var(--text)',
-                                        outline: 'none'
-                                    }}
-                                />
-                            </div>
-                            <button
-                                className="btn btn-secondary"
-                                onClick={() => setIsCreating(true)}
-                                title="Criar Nova Organização"
-                            >
-                                <Plus size={20} />
-                            </button>
-                        </div>
-
-                        {/* Organization List */}
-                        <div
-                            style={{
-                                flex: 1,
-                                overflowY: 'auto',
-                                border: '1px solid var(--surface-light)',
-                                borderRadius: 'var(--radius)',
-                                marginBottom: '1.5rem',
-                                background: 'var(--surface-light)'
-                            }}
+                        <IOSButton
+                            variant="secondary"
+                            onClick={handleRefresh}
+                            disabled={refreshing || loading}
+                            style={{ width: '44px', padding: 0 }}
                         >
-                            {loading ? (
-                                <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                                    Carregando...
-                                </div>
-                            ) : filteredOrgs.length === 0 ? (
-                                <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                                    Nenhuma organização encontrada.
-                                    <br />
-                                    <button
-                                        className="btn btn-outline"
-                                        style={{ marginTop: '1rem' }}
-                                        onClick={() => setIsCreating(true)}
+                            <RefreshCw
+                                size={20}
+                                style={{
+                                    animation: refreshing ? 'spin 1s linear infinite' : 'none'
+                                }}
+                            />
+                        </IOSButton>
+                        <IOSButton
+                            onClick={() => setIsCreating(true)}
+                            style={{ width: '44px', padding: 0 }}
+                        >
+                            <Plus size={20} />
+                        </IOSButton>
+                    </div>
+
+                    {/* Organization List */}
+                    <div
+                        style={{
+                            height: '300px',
+                            overflowY: 'auto',
+                            background: 'rgba(255, 255, 255, 0.05)',
+                            borderRadius: '16px',
+                            marginBottom: '1.5rem',
+                            border: '1px solid rgba(255, 255, 255, 0.1)'
+                        }}
+                    >
+                        {loading ? (
+                            <div style={{ padding: '2rem', textAlign: 'center', color: '#8E8E93' }}>
+                                Carregando...
+                            </div>
+                        ) : filteredOrgs.length === 0 ? (
+                            <div style={{ padding: '2rem', textAlign: 'center', color: '#8E8E93' }}>
+                                Nenhuma organização encontrada.
+                                <br />
+                                <IOSButton
+                                    variant="secondary"
+                                    style={{ marginTop: '1rem' }}
+                                    onClick={() => setIsCreating(true)}
+                                >
+                                    Criar Nova Organização
+                                </IOSButton>
+                            </div>
+                        ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+                                {filteredOrgs.map(org => (
+                                    <div
+                                        key={org.id}
+                                        onClick={() => setSelectedOrgId(org.id)}
+                                        style={{
+                                            padding: '1rem',
+                                            cursor: 'pointer',
+                                            background: selectedOrgId === org.id ? 'rgba(10, 132, 255, 0.15)' : 'transparent',
+                                            transition: 'background 0.2s',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'space-between'
+                                        }}
                                     >
-                                        Criar Nova Organização
-                                    </button>
-                                </div>
-                            ) : (
-                                <div>
-                                    {filteredOrgs.map(org => (
-                                        <div
-                                            key={org.id}
-                                            onClick={() => setSelectedOrgId(org.id)}
-                                            style={{
-                                                padding: '1rem',
-                                                cursor: 'pointer',
-                                                borderBottom: '1px solid rgba(255,255,255,0.05)',
-                                                background: selectedOrgId === org.id ? 'rgba(99, 102, 241, 0.2)' : 'transparent',
-                                                transition: 'background 0.2s'
-                                            }}
-                                        >
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                            {/* Organization Logo or Avatar */}
+                                            {org.logo_url ? (
+                                                <img
+                                                    src={org.logo_url}
+                                                    alt={org.name_official}
+                                                    style={{
+                                                        width: '36px', height: '36px', borderRadius: '50%',
+                                                        objectFit: 'cover',
+                                                        border: selectedOrgId === org.id ? '2px solid #0A84FF' : '1px solid rgba(255,255,255,0.1)'
+                                                    }}
+                                                />
+                                            ) : (
                                                 <div
                                                     style={{
-                                                        width: '20px',
-                                                        height: '20px',
+                                                        width: '36px',
+                                                        height: '36px',
                                                         borderRadius: '50%',
-                                                        border: `2px solid ${selectedOrgId === org.id ? 'var(--primary)' : 'var(--text-muted)'}`,
-                                                        background: selectedOrgId === org.id ? 'var(--primary)' : 'transparent',
+                                                        background: selectedOrgId === org.id ? '#0A84FF' : 'rgba(255, 255, 255, 0.1)',
                                                         display: 'flex',
                                                         alignItems: 'center',
                                                         justifyContent: 'center',
-                                                        flexShrink: 0
+                                                        color: 'white',
+                                                        fontWeight: 'bold',
+                                                        fontSize: '14px'
                                                     }}
                                                 >
-                                                    {selectedOrgId === org.id && (
-                                                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'white' }} />
-                                                    )}
+                                                    {org.name_official.charAt(0).toUpperCase()}
                                                 </div>
-                                                <div>
-                                                    <div style={{ fontWeight: selectedOrgId === org.id ? 'bold' : 'normal' }}>
-                                                        {org.name_official}
+                                            )}
+                                            <div>
+                                                <div style={{ fontWeight: selectedOrgId === org.id ? 600 : 400, color: 'white' }}>
+                                                    {org.name_official}
+                                                </div>
+                                                {org.name_short && (
+                                                    <div style={{ fontSize: '12px', color: '#8E8E93' }}>
+                                                        {org.name_short}
                                                     </div>
-                                                    {org.name_short && (
-                                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                                                            {org.name_short}
-                                                        </div>
-                                                    )}
-                                                </div>
+                                                )}
                                             </div>
                                         </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
+                                        {selectedOrgId === org.id && (
+                                            <Check size={20} color="#0A84FF" />
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
 
-                        {/* Actions */}
-                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-                            <button className="btn btn-secondary" onClick={onClose} disabled={submitting}>
-                                Cancelar
-                            </button>
-                            <button
-                                className="btn btn-primary"
-                                onClick={handleSubmit}
-                                disabled={!selectedOrgId || submitting}
-                                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-                            >
-                                <Plus size={16} />
-                                {submitting ? 'Inscrevendo...' : 'Inscrever'}
-                            </button>
-                        </div>
-                    </>
-                )}
-            </div>
-        </div>
+                    {/* Actions */}
+                    <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                        <IOSButton variant="secondary" onClick={onClose} disabled={submitting}>
+                            Cancelar
+                        </IOSButton>
+                        <IOSButton
+                            onClick={handleSubmit}
+                            disabled={!selectedOrgId || submitting}
+                        >
+                            <Plus size={16} />
+                            {submitting ? 'Inscrevendo...' : 'Inscrever'}
+                        </IOSButton>
+                    </div>
+                </>
+            )}
+        </IOSModal>
     );
 };
 

@@ -24,9 +24,11 @@ export const login = async (req: Request, res: Response) => {
                 .single();
 
             if (searchError || !userFound) {
+                console.log('❌ CPF não encontrado no banco de dados');
                 return res.status(401).json({ error: 'CPF não encontrado' });
             }
             emailToLogin = userFound.email;
+            console.log(`🔍 CPF resolvido para email: ${emailToLogin}`);
         }
 
         // Autenticar com Supabase

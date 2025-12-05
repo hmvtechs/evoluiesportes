@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { API_BASE_URL } from '../config/api';
+import { IOSCard, IOSButton, IOSInput } from '../components/ui/IOSDesign';
 
 const Login: React.FC = () => {
     const [identifier, setIdentifier] = useState('');
@@ -39,31 +40,57 @@ const Login: React.FC = () => {
             alignItems: 'center',
             justifyContent: 'center',
             minHeight: '100vh',
-            background: 'radial-gradient(circle at top right, var(--surface), var(--background))'
+            background: '#000000',
+            position: 'relative',
+            overflow: 'hidden'
         }}>
-            <div className="glass animate-fade-in" style={{ width: '100%', maxWidth: '400px', padding: '2rem' }}>
-                <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>e-Esporte</h1>
-                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {/* Ambient Background */}
+            <div style={{
+                position: 'absolute', top: '-20%', left: '-10%', width: '60%', height: '60%',
+                background: 'radial-gradient(circle, rgba(10, 132, 255, 0.2) 0%, transparent 70%)',
+                filter: 'blur(80px)'
+            }} />
+            <div style={{
+                position: 'absolute', bottom: '-20%', right: '-10%', width: '60%', height: '60%',
+                background: 'radial-gradient(circle, rgba(48, 209, 88, 0.15) 0%, transparent 70%)',
+                filter: 'blur(80px)'
+            }} />
+
+            <IOSCard style={{ width: '100%', maxWidth: '400px', padding: '2.5rem', zIndex: 1, backdropFilter: 'blur(40px)' }}>
+                <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+                    <img
+                        src="/logo.png"
+                        alt="Evolui"
+                        style={{
+                            height: '80px',
+                            marginBottom: '1rem',
+                            objectFit: 'contain',
+                            filter: 'drop-shadow(0 0 20px rgba(10, 132, 255, 0.4))'
+                        }}
+                    />
+                    <p style={{ color: '#8E8E93', fontSize: '15px' }}>Bem-vindo de volta</p>
+                </div>
+
+                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                     <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem' }}>Email ou CPF</label>
-                        <input
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '13px', color: '#8E8E93', fontWeight: 500 }}>Email ou CPF</label>
+                        <IOSInput
                             type="text"
-                            className="input"
                             value={identifier}
                             onChange={(e) => setIdentifier(e.target.value)}
-                            placeholder="admin@admin.com"
+                            placeholder="Digite seu acesso"
+                            style={{ background: 'rgba(0,0,0,0.2)' }}
                         />
                     </div>
                     <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem' }}>Senha</label>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '13px', color: '#8E8E93', fontWeight: 500 }}>Senha</label>
                         <div style={{ position: 'relative' }}>
-                            <input
+                            <IOSInput
                                 type={showPassword ? "text" : "password"}
-                                className="input"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                placeholder="admin"
-                                style={{ paddingRight: '2.5rem' }}
+                                placeholder="Sua senha"
+                                style={{ paddingRight: '2.5rem', background: 'rgba(0,0,0,0.2)' }}
                             />
                             <button
                                 type="button"
@@ -76,26 +103,44 @@ const Login: React.FC = () => {
                                     background: 'none',
                                     border: 'none',
                                     cursor: 'pointer',
-                                    color: 'var(--text-muted)',
+                                    color: '#8E8E93',
                                     padding: '0.25rem',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
                                 }}
-                                aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
                             >
                                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                             </button>
                         </div>
                     </div>
-                    {error && <p style={{ color: 'var(--danger)', fontSize: '0.875rem' }}>{error}</p>}
-                    <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem' }}>Entrar</button>
-                    <div style={{ textAlign: 'center', marginTop: '1rem' }}>
-                        <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Não tem conta? </span>
-                        <a href="/register" style={{ color: 'var(--primary)', textDecoration: 'none', fontSize: '0.875rem' }}>Criar Conta</a>
+
+                    {error && (
+                        <div style={{
+                            padding: '0.75rem', borderRadius: '8px',
+                            background: 'rgba(255, 69, 58, 0.1)', color: '#FF453A',
+                            fontSize: '13px', textAlign: 'center'
+                        }}>
+                            {error}
+                        </div>
+                    )}
+
+                    <IOSButton
+                        onClick={(e) => handleSubmit(e as any)}
+                        style={{ marginTop: '0.5rem', width: '100%', justifyContent: 'center' }}
+                    >
+                        Entrar
+                    </IOSButton>
+
+                    <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
+                        <span style={{ color: '#8E8E93', fontSize: '14px' }}>Não tem conta? </span>
+                        <a
+                            href="/register"
+                            style={{ color: '#0A84FF', textDecoration: 'none', fontSize: '14px', fontWeight: 600 }}
+                        >
+                            Criar Conta
+                        </a>
                     </div>
                 </form>
-            </div>
+            </IOSCard>
         </div>
     );
 };

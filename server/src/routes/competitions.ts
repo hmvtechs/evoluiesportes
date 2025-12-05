@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createCompetition, listCompetitions, getCompetition, uploadRegulation, generateFixture, registerTeam, drawGroups, getFixture, generateBracketKnockout } from '../controllers/competitionController';
+import { createCompetition, listCompetitions, getCompetition, deleteCompetition, uploadRegulation, generateFixture, registerTeam, drawGroups, getFixture, generateBracketKnockout, unregisterTeam, updateTeamRegistration } from '../controllers/competitionController';
 import { addAthleteToTeam, listTeamAthletes, removeAthleteFromTeam } from '../controllers/athleteController';
 import { authenticate } from '../middleware/authenticate';
 import { authorize } from '../middleware/authorize';
@@ -9,9 +9,12 @@ const router = Router();
 router.get('/', listCompetitions); // Public list? Or authenticated? Let's make it public for now or basic auth.
 router.get('/:id', getCompetition);
 router.post('/', authenticate, authorize(['ADMIN']), createCompetition);
+router.delete('/:id', authenticate, authorize(['ADMIN']), deleteCompetition);
 router.post('/:id/regulation', authenticate, authorize(['ADMIN']), uploadRegulation);
 router.post('/:id/fixture', authenticate, authorize(['ADMIN']), generateFixture);
-router.post('/:id/register-team', authenticate, authorize(['ADMIN']), registerTeam);
+router.post('/:id/register-team', authenticate, registerTeam);
+router.delete('/:id/registrations/:teamRegId', authenticate, authorize(['ADMIN']), unregisterTeam);
+router.put('/:id/registrations/:teamRegId', authenticate, authorize(['ADMIN']), updateTeamRegistration);
 router.post('/:id/draw-groups', authenticate, authorize(['ADMIN']), drawGroups);
 router.post('/:id/generate-bracket', authenticate, authorize(['ADMIN']), generateBracketKnockout);
 router.get('/:id/fixture', getFixture); // Public or authenticated?
@@ -24,3 +27,4 @@ router.get('/team-registrations/:team_registration_id/athletes', authenticate, a
 router.delete('/team-registrations/:team_registration_id/athletes/:athlete_id', authenticate, authorize(['ADMIN']), removeAthleteFromTeam);
 
 export default router;
+

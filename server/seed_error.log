@@ -1,0 +1,19 @@
+--- INICIANDO SUPABASE (CURL MODE) ---
+1. Ambiente: development
+2. URL: https://deqtlplceaphtindxxtu.supabase.co
+3. KEY (Anon): OK
+4. SERVICE_KEY: OK
+Ô£à Supabase inicializado (CURL Fetch)
+Seeding tournament 7 with 10 teams and 60 athletes...
+Creating teams via exec_sql...
+Ô£à Created 10 teams via exec_sql
+Found undefined teams to register
+Registering teams to competition...
+Fatal error during seeding: TypeError: createdTeams is not iterable
+    at seedTournament (C:\Users\Luis\Documents\EvoluiGest├úo\server\src\scripts\seed_tournament.ts:49:28)
+    at processTicksAndRejections (node:internal/process/task_queues:103:5)
+npm notice
+npm notice New patch version of npm available! 11.6.2 -> 11.6.4
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.6.4
+npm notice To update run: npm install -g npm@11.6.4
+npm notice

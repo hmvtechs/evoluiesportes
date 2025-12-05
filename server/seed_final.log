@@ -1,0 +1,11 @@
+--- INICIANDO SUPABASE (CURL MODE) ---
+1. Ambiente: development
+2. URL: https://deqtlplceaphtindxxtu.supabase.co
+3. KEY (Anon): OK
+4. SERVICE_KEY: OK
+Ô£à Supabase inicializado (CURL Fetch)
+Seeding tournament 7 with 10 teams and 60 athletes...
+1. Creating manager user...
+Ô£à Manager created: 171e85cc-559d-4c7d-aa26-f63885d47696
+2. Creating organization...
+Failed to get organization ID. Orgs data: []

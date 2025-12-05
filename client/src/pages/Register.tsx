@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config/api';
-import { Save, Eye, EyeOff } from 'lucide-react';
+import { Save, Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { IOSCard, IOSButton, IOSInput } from '../components/ui/IOSDesign';
 
 const Register: React.FC = () => {
     const navigate = useNavigate();
@@ -66,9 +67,6 @@ const Register: React.FC = () => {
         setError('');
     };
 
-    /**
-     * Validates CPF with apicpf.com API when user leaves the CPF field
-     */
     const handleBlurCpf = async () => {
         const cleanCpf = formData.cpf.replace(/\D/g, '');
         if (cleanCpf.length !== 11) {
@@ -76,11 +74,11 @@ const Register: React.FC = () => {
             return;
         }
         if (!validateCPF(cleanCpf)) {
-            setRfStatus('❌ CPF inválido (dígito verificador incorreto)');
+            setRfStatus('❌ CPF inválido');
             return;
         }
 
-        setRfStatus('🔍 Validando CPF...');
+        setRfStatus('🔍 Validando...');
 
         try {
             const res = await fetch(`${API_BASE_URL}/api/v1/auth/validate-rf`, {
@@ -92,34 +90,38 @@ const Register: React.FC = () => {
             const data = await res.json();
 
             if (res.ok && data.valid) {
-                setRfStatus('✅ CPF válido');
-
-                // Auto-fill all available data from API
                 const updates: any = {};
-                if (data.name && !formData.full_name) {
-                    updates.full_name = data.name;
+                const name = data.name || data.nome;
+                const birthDate = data.birthDate || data.birth_date || data.nascimento;
+                const gender = data.gender || data.sexo || data.sex;
+
+                if (name) updates.full_name = name;
+                if (birthDate) {
+                    if (birthDate.includes('/')) {
+                        const [day, month, year] = birthDate.split('/');
+                        updates.birth_date = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+                    } else {
+                        updates.birth_date = birthDate;
+                    }
                 }
-                if (data.birthDate && !formData.birth_date) {
-                    updates.birth_date = data.birthDate;
+                if (gender) {
+                    const normalizedGender = gender.toUpperCase();
+                    if (normalizedGender.startsWith('M')) updates.sex = 'M';
+                    else if (normalizedGender.startsWith('F')) updates.sex = 'F';
+                    else updates.sex = normalizedGender;
                 }
-                if (data.gender && !formData.sex) {
-                    updates.sex = data.gender;
-                }
+
                 if (Object.keys(updates).length > 0) {
                     setFormData(prev => ({ ...prev, ...updates }));
+                    setRfStatus(`✅ CPF válido`);
+                } else {
+                    setRfStatus('✅ CPF válido');
                 }
-            } else if (data.status === 'TIMEOUT') {
-                setRfStatus('⏱️ Timeout ao consultar API. Tente novamente.');
-            } else if (data.status === 'RATE_LIMIT') {
-                setRfStatus('⚠️ Limite de requisições excedido. Aguarde um momento.');
-            } else if (data.status === 'NOT_FOUND') {
-                setRfStatus('⚠️ CPF não encontrado na base de dados');
             } else {
-                setRfStatus('❌ ' + (data.error || 'CPF irregular'));
+                setRfStatus('⚠️ ' + (data.error || 'CPF não encontrado'));
             }
         } catch (err) {
-            console.error('CPF validation error:', err);
-            setRfStatus('⚠️ Erro ao validar CPF. Verifique sua conexão.');
+            setRfStatus('⚠️ Erro ao validar');
         }
     };
 
@@ -127,9 +129,8 @@ const Register: React.FC = () => {
         e.preventDefault();
         const cleanCpf = formData.cpf.replace(/\D/g, '');
 
-        // Basic validation
         if (!formData.email || !cleanCpf || !formData.password || !formData.full_name) {
-            setError('Por favor, preencha todos os campos obrigatórios');
+            setError('Preencha os campos obrigatórios');
             return;
         }
 
@@ -139,12 +140,7 @@ const Register: React.FC = () => {
         }
 
         if (formData.password !== formData.confirmPassword) {
-            setError('As senhas não coincidem');
-            return;
-        }
-
-        if (formData.password.length < 4) {
-            setError('A senha deve ter pelo menos 4 caracteres');
+            setError('Senhas não coincidem');
             return;
         }
 
@@ -171,200 +167,207 @@ const Register: React.FC = () => {
             const data = await res.json();
 
             if (res.ok) {
-                alert('✅ Cadastro realizado com sucesso! Faça login para continuar.');
+                alert('✅ Cadastro realizado com sucesso!');
                 navigate('/login');
             } else {
-                setError(data.error || 'Erro ao cadastrar. Tente novamente.');
+                setError(data.error || 'Erro ao cadastrar');
             }
         } catch (err) {
-            console.error('Registration error:', err);
-            setError('Erro de conexão com o servidor. Verifique se o backend está rodando.');
+            setError('Erro de conexão');
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem', minHeight: '100vh', alignItems: 'center' }}>
-            <div className="glass animate-fade-in" style={{ padding: '2rem', maxWidth: '600px', width: '100%' }}>
-                <h1 style={{ marginBottom: '1.5rem', textAlign: 'center' }}>Cadastro de Cidadão</h1>
+        <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            minHeight: '100vh', background: '#000000', padding: '2rem',
+            position: 'relative'
+        }}>
+            {/* Ambient Background */}
+            <div style={{
+                position: 'absolute', top: '-10%', right: '-10%', width: '50%', height: '50%',
+                background: 'radial-gradient(circle, rgba(10, 132, 255, 0.15) 0%, transparent 70%)',
+                filter: 'blur(80px)'
+            }} />
+
+            <IOSCard style={{ width: '100%', maxWidth: '600px', padding: '2.5rem', zIndex: 1, backdropFilter: 'blur(40px)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '2rem' }}>
+                    <IOSButton variant="ghost" onClick={() => navigate('/login')} style={{ padding: '0.5rem', marginRight: '1rem' }}>
+                        <ArrowLeft size={20} />
+                    </IOSButton>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <img
+                            src="/logo.png"
+                            alt="Evolui"
+                            style={{ height: '40px', objectFit: 'contain' }}
+                        />
+                        <h1 style={{ fontSize: '24px', fontWeight: 800, margin: 0 }}>Cadastro</h1>
+                    </div>
+                </div>
+
                 {error && (
-                    <div style={{ padding: '1rem', marginBottom: '1rem', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.5)', borderRadius: '0.5rem', color: 'var(--danger)' }}>
+                    <div style={{
+                        padding: '0.75rem', borderRadius: '8px', marginBottom: '1.5rem',
+                        background: 'rgba(255, 69, 58, 0.1)', color: '#FF453A',
+                        fontSize: '13px', textAlign: 'center'
+                    }}>
                         {error}
                     </div>
                 )}
-                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+
+                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                     {/* CPF */}
                     <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem' }}>
-                            CPF <span style={{ color: 'var(--danger)' }}>*</span>
-                        </label>
-                        <input
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '13px', color: '#8E8E93' }}>CPF *</label>
+                        <IOSInput
                             name="cpf"
-                            className="input"
                             value={formData.cpf}
                             onChange={handleChange}
                             onBlur={handleBlurCpf}
                             placeholder="000.000.000-00"
                             maxLength={14}
-                            required
+                            style={{ background: 'rgba(0,0,0,0.2)' }}
                         />
                         {rfStatus && (
-                            <p style={{ fontSize: '0.75rem', marginTop: '0.25rem', color: rfStatus.includes('✅') ? 'var(--success)' : 'var(--danger)' }}>
+                            <p style={{ fontSize: '12px', marginTop: '0.5rem', color: rfStatus.includes('✅') ? '#30D158' : '#FF453A' }}>
                                 {rfStatus}
                             </p>
                         )}
                     </div>
-                    {/* Role Selection */}
+
+                    {/* Role */}
                     <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem' }}>
-                            Tipo de Conta <span style={{ color: 'var(--danger)' }}>*</span>
-                        </label>
-                        <select name="role" className="input" value={formData.role} onChange={handleChange} required>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '13px', color: '#8E8E93' }}>Tipo de Conta *</label>
+                        <select
+                            name="role"
+                            value={formData.role}
+                            onChange={handleChange}
+                            style={{
+                                width: '100%', padding: '12px 16px', borderRadius: '12px',
+                                background: 'rgba(0, 0, 0, 0.2)', border: 'none', color: 'white',
+                                fontSize: '16px', outline: 'none', appearance: 'none'
+                            }}
+                        >
                             <option value="FAN">🎉 Torcedor</option>
                             <option value="ATHLETE">🏃 Atleta</option>
                             <option value="CLUB">⚽ Clube / Time</option>
                             <option value="REFEREE">👨‍⚖️ Árbitro</option>
                             <option value="STAFF">👔 Staff / Organizador</option>
                         </select>
-                        <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                            Escolha como você pretende usar a plataforma. Você pode alterar depois.
-                        </p>
                     </div>
+
                     {/* Full Name */}
                     <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem' }}>
-                            Nome Completo <span style={{ color: 'var(--danger)' }}>*</span>
-                        </label>
-                        <input name="full_name" className="input" value={formData.full_name} onChange={handleChange} required />
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '13px', color: '#8E8E93' }}>Nome Completo *</label>
+                        <IOSInput name="full_name" value={formData.full_name} onChange={handleChange} style={{ background: 'rgba(0,0,0,0.2)' }} />
                     </div>
-                    {/* Birth Date and Sex */}
+
+                    {/* Birth & Sex */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                         <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem' }}>Data de Nascimento</label>
-                            <input type="date" name="birth_date" className="input" value={formData.birth_date} onChange={handleChange} />
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '13px', color: '#8E8E93' }}>Nascimento</label>
+                            <IOSInput type="date" name="birth_date" value={formData.birth_date} onChange={handleChange} style={{ background: 'rgba(0,0,0,0.2)' }} />
                         </div>
                         <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem' }}>Sexo</label>
-                            <select name="sex" className="input" value={formData.sex} onChange={handleChange}>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '13px', color: '#8E8E93' }}>Sexo</label>
+                            <select
+                                name="sex"
+                                value={formData.sex}
+                                onChange={handleChange}
+                                style={{
+                                    width: '100%', padding: '12px 16px', borderRadius: '12px',
+                                    background: 'rgba(0, 0, 0, 0.2)', border: 'none', color: 'white',
+                                    fontSize: '16px', outline: 'none'
+                                }}
+                            >
                                 <option value="">Selecione</option>
                                 <option value="M">Masculino</option>
                                 <option value="F">Feminino</option>
-                                <option value="I">Indefinido/Outro</option>
                             </select>
                         </div>
                     </div>
-                    {/* Email */}
+
+                    {/* Email & Phone */}
                     <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem' }}>
-                            Email <span style={{ color: 'var(--danger)' }}>*</span>
-                        </label>
-                        <input type="email" name="email" className="input" value={formData.email} onChange={handleChange} required />
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '13px', color: '#8E8E93' }}>Email *</label>
+                        <IOSInput type="email" name="email" value={formData.email} onChange={handleChange} style={{ background: 'rgba(0,0,0,0.2)' }} />
                     </div>
-                    {/* Phone */}
                     <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem' }}>Telefone</label>
-                        <input type="tel" name="phone" className="input" value={formData.phone} onChange={handleChange} placeholder="(00) 00000-0000" />
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '13px', color: '#8E8E93' }}>Telefone</label>
+                        <IOSInput type="tel" name="phone" value={formData.phone} onChange={handleChange} placeholder="(00) 00000-0000" style={{ background: 'rgba(0,0,0,0.2)' }} />
                     </div>
-                    {/* Password */}
+
+                    {/* Passwords */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                         <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem' }}>
-                                Senha <span style={{ color: 'var(--danger)' }}>*</span>
-                            </label>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '13px', color: '#8E8E93' }}>Senha *</label>
                             <div style={{ position: 'relative' }}>
-                                <input
+                                <IOSInput
                                     type={showPassword ? "text" : "password"}
                                     name="password"
-                                    className="input"
                                     value={formData.password}
                                     onChange={handleChange}
-                                    style={{ paddingRight: '2.5rem' }}
-                                    required
+                                    style={{ paddingRight: '2.5rem', background: 'rgba(0,0,0,0.2)' }}
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
                                     style={{
-                                        position: 'absolute',
-                                        right: '0.75rem',
-                                        top: '50%',
-                                        transform: 'translateY(-50%)',
-                                        background: 'none',
-                                        border: 'none',
-                                        cursor: 'pointer',
-                                        color: 'var(--text-muted)',
-                                        padding: '0.25rem',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center'
+                                        position: 'absolute', right: '0.5rem', top: '50%', transform: 'translateY(-50%)',
+                                        background: 'none', border: 'none', color: '#8E8E93', cursor: 'pointer'
                                     }}
-                                    aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
                                 >
                                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                                 </button>
                             </div>
                         </div>
                         <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem' }}>
-                                Confirmar Senha <span style={{ color: 'var(--danger)' }}>*</span>
-                            </label>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '13px', color: '#8E8E93' }}>Confirmar *</label>
                             <div style={{ position: 'relative' }}>
-                                <input
+                                <IOSInput
                                     type={showConfirmPassword ? "text" : "password"}
                                     name="confirmPassword"
-                                    className="input"
                                     value={formData.confirmPassword}
                                     onChange={handleChange}
-                                    style={{ paddingRight: '2.5rem' }}
-                                    required
+                                    style={{ paddingRight: '2.5rem', background: 'rgba(0,0,0,0.2)' }}
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                     style={{
-                                        position: 'absolute',
-                                        right: '0.75rem',
-                                        top: '50%',
-                                        transform: 'translateY(-50%)',
-                                        background: 'none',
-                                        border: 'none',
-                                        cursor: 'pointer',
-                                        color: 'var(--text-muted)',
-                                        padding: '0.25rem',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center'
+                                        position: 'absolute', right: '0.5rem', top: '50%', transform: 'translateY(-50%)',
+                                        background: 'none', border: 'none', color: '#8E8E93', cursor: 'pointer'
                                     }}
-                                    aria-label={showConfirmPassword ? "Ocultar senha" : "Mostrar senha"}
                                 >
                                     {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                                 </button>
                             </div>
                         </div>
                     </div>
-                    {/* City and State */}
+
+                    {/* City & State */}
                     <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem' }}>
                         <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem' }}>Cidade</label>
-                            <input name="city" className="input" value={formData.city} onChange={handleChange} />
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '13px', color: '#8E8E93' }}>Cidade</label>
+                            <IOSInput name="city" value={formData.city} onChange={handleChange} style={{ background: 'rgba(0,0,0,0.2)' }} />
                         </div>
                         <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem' }}>Estado (UF)</label>
-                            <input name="state" className="input" value={formData.state} onChange={handleChange} maxLength={2} placeholder="SP" />
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '13px', color: '#8E8E93' }}>UF</label>
+                            <IOSInput name="state" value={formData.state} onChange={handleChange} maxLength={2} placeholder="SP" style={{ background: 'rgba(0,0,0,0.2)' }} />
                         </div>
                     </div>
-                    {/* Submit Button */}
-                    <button type="submit" className="btn btn-primary" disabled={loading} style={{ marginTop: '1rem' }}>
-                        <Save size={18} /> {loading ? 'Cadastrando...' : 'Cadastrar'}
-                    </button>
-                    {/* Link to Login */}
-                    <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
-                        <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Já tem conta? </span>
-                        <a href="/login" style={{ color: 'var(--primary)', textDecoration: 'none', fontSize: '0.875rem' }}>Fazer Login</a>
-                    </div>
+
+                    <IOSButton
+                        onClick={(e) => handleSubmit(e as any)}
+                        disabled={loading}
+                        style={{ marginTop: '1rem', width: '100%', justifyContent: 'center' }}
+                    >
+                        <Save size={18} /> {loading ? 'Cadastrando...' : 'Finalizar Cadastro'}
+                    </IOSButton>
                 </form>
-            </div>
+            </IOSCard>
         </div>
     );
 };

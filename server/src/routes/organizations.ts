@@ -5,9 +5,9 @@ import { authorize } from '../middleware/authorize';
 
 const router = Router();
 
-router.get('/', authenticate, authorize(['ADMIN']), listOrganizations);
+router.get('/', authenticate, listOrganizations);
 router.get('/:id', authenticate, authorize(['ADMIN']), getOrganization);
-router.post('/', authenticate, authorize(['ADMIN']), createOrganization);
+router.post('/', authenticate, createOrganization);
 router.put('/:id', authenticate, authorize(['ADMIN']), updateOrganization);
 router.delete('/:id', authenticate, authorize(['ADMIN']), deleteOrganization);
 

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { MapPin, Save, ArrowLeft } from 'lucide-react';
+import { MapPin, Save, ArrowLeft, Info, Settings, DollarSign } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { IOSCard, IOSInput, IOSButton, IOSSegmentedControl } from '../components/ui/IOSDesign';
 
 const VenueForm: React.FC = () => {
     const navigate = useNavigate();
@@ -78,107 +79,185 @@ const VenueForm: React.FC = () => {
             });
 
             if (response.ok) {
-                alert('Local salvo com sucesso!');
+                alert('✅ Local salvo com sucesso!');
                 navigate('/venues');
             } else {
                 const data = await response.json();
-                alert(`Erro: ${data.error}`);
+                alert(`❌ Erro: ${data.error}`);
             }
         } catch (error) {
-            alert('Erro de conexão');
+            alert('❌ Erro de conexão');
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="animate-fade-in" style={{ maxWidth: '800px', margin: '0 auto' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
-                <button className="btn-icon" onClick={() => navigate('/venues')}><ArrowLeft size={24} /></button>
-                <MapPin size={32} color="var(--primary)" />
-                <h1>{id ? 'Editar Local' : 'Novo Local Esportivo'}</h1>
+        <div className="animate-fade-in" style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <IOSButton variant="secondary" onClick={() => navigate('/venues')} style={{ width: '40px', height: '40px', padding: 0, justifyContent: 'center' }}>
+                        <ArrowLeft size={20} />
+                    </IOSButton>
+                    <div>
+                        <h1 style={{ fontSize: '34px', fontWeight: 800, margin: 0 }}>{id ? 'Editar Local' : 'Novo Local'}</h1>
+                        <p style={{ color: '#8E8E93', fontSize: '17px', marginTop: '0.25rem' }}>
+                            {id ? 'Atualize as informações do local' : 'Cadastre um novo espaço esportivo'}
+                        </p>
+                    </div>
+                </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="card" style={{ display: 'grid', gap: '1.5rem' }}>
+            <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '2rem' }}>
                 {/* Basic Info */}
-                <section>
-                    <h3>Informações Básicas</h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1rem' }}>
-                        <div>
-                            <label>Nome Oficial</label>
-                            <input type="text" name="name" className="input" value={formData.name} onChange={handleChange} required />
+                <IOSCard>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                        <Info size={24} color="#0A84FF" />
+                        <h3 style={{ fontSize: '20px', fontWeight: 700, margin: 0 }}>Informações Básicas</h3>
+                    </div>
+                    <div style={{ display: 'grid', gap: '1.5rem' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '13px', color: '#8E8E93' }}>Nome Oficial</label>
+                                <IOSInput name="name" value={formData.name} onChange={handleChange} required placeholder="Ex: Ginásio Municipal" />
+                            </div>
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '13px', color: '#8E8E93' }}>Apelido</label>
+                                <IOSInput name="nickname" value={formData.nickname} onChange={handleChange} placeholder="Ex: Ginasião" />
+                            </div>
                         </div>
-                        <div>
-                            <label>Apelido</label>
-                            <input type="text" name="nickname" className="input" value={formData.nickname} onChange={handleChange} />
-                        </div>
-                        <div>
-                            <label>Tipo</label>
-                            <select name="type" className="input" value={formData.type} onChange={handleChange}>
-                                <option value="FIELD">Campo</option>
-                                <option value="GYM">Ginásio</option>
-                                <option value="COURT">Quadra</option>
-                                <option value="POOL">Piscina</option>
-                                <option value="COMPLEX">Complexo</option>
-                                <option value="TRACK">Pista</option>
-                                <option value="OTHER">Outro</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label>Data Inauguração</label>
-                            <input type="date" name="inauguration_date" className="input" value={formData.inauguration_date} onChange={handleChange} />
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '13px', color: '#8E8E93' }}>Tipo</label>
+                                <select
+                                    name="type"
+                                    value={formData.type}
+                                    onChange={handleChange}
+                                    style={{
+                                        width: '100%', padding: '12px', borderRadius: '12px',
+                                        background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+                                        color: 'white', fontSize: '15px'
+                                    }}
+                                >
+                                    <option value="FIELD" style={{ color: 'black' }}>Campo</option>
+                                    <option value="GYM" style={{ color: 'black' }}>Ginásio</option>
+                                    <option value="COURT" style={{ color: 'black' }}>Quadra</option>
+                                    <option value="POOL" style={{ color: 'black' }}>Piscina</option>
+                                    <option value="COMPLEX" style={{ color: 'black' }}>Complexo</option>
+                                    <option value="TRACK" style={{ color: 'black' }}>Pista</option>
+                                    <option value="OTHER" style={{ color: 'black' }}>Outro</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '13px', color: '#8E8E93' }}>Data Inauguração</label>
+                                <IOSInput type="date" name="inauguration_date" value={formData.inauguration_date} onChange={handleChange} />
+                            </div>
                         </div>
                     </div>
-                </section>
+                </IOSCard>
 
                 {/* Location */}
-                <section>
-                    <h3>Localização</h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1rem' }}>
-                        <input type="text" name="zip_code" className="input" placeholder="CEP" value={formData.zip_code} onChange={handleChange} />
-                        <input type="text" name="city" className="input" placeholder="Cidade" value={formData.city} onChange={handleChange} />
-                        <input type="text" name="neighborhood" className="input" placeholder="Bairro" value={formData.neighborhood} onChange={handleChange} />
-                        <input type="text" name="address" className="input" placeholder="Endereço" value={formData.address} onChange={handleChange} />
-                        <input type="text" name="number" className="input" placeholder="Número" value={formData.number} onChange={handleChange} />
-                        <input type="text" name="complement" className="input" placeholder="Complemento" value={formData.complement} onChange={handleChange} />
+                <IOSCard>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                        <MapPin size={24} color="#30D158" />
+                        <h3 style={{ fontSize: '20px', fontWeight: 700, margin: 0 }}>Localização</h3>
                     </div>
-                </section>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <IOSInput name="zip_code" placeholder="CEP" value={formData.zip_code} onChange={handleChange} />
+                        <IOSInput name="city" placeholder="Cidade" value={formData.city} onChange={handleChange} />
+                        <IOSInput name="neighborhood" placeholder="Bairro" value={formData.neighborhood} onChange={handleChange} />
+                        <IOSInput name="address" placeholder="Endereço" value={formData.address} onChange={handleChange} />
+                        <IOSInput name="number" placeholder="Número" value={formData.number} onChange={handleChange} />
+                        <IOSInput name="complement" placeholder="Complemento" value={formData.complement} onChange={handleChange} />
+                    </div>
+                </IOSCard>
 
                 {/* Config & Specs */}
-                <section>
-                    <h3>Configuração e Reservas</h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1rem' }}>
+                <IOSCard>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                        <Settings size={24} color="#FF9F0A" />
+                        <h3 style={{ fontSize: '20px', fontWeight: 700, margin: 0 }}>Configuração e Reservas</h3>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                         <div>
-                            <label>Capacidade</label>
-                            <input type="number" name="capacity" className="input" value={formData.capacity} onChange={handleChange} />
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '13px', color: '#8E8E93' }}>Capacidade</label>
+                            <IOSInput type="number" name="capacity" value={formData.capacity} onChange={handleChange} />
                         </div>
                         <div>
-                            <label>Preço/Hora (R$)</label>
-                            <input type="number" name="price_per_hour" className="input" value={formData.price_per_hour} onChange={handleChange} />
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '13px', color: '#8E8E93' }}>Preço/Hora (R$)</label>
+                            <IOSInput type="number" name="price_per_hour" value={formData.price_per_hour} onChange={handleChange} />
                         </div>
                         <div>
-                            <label>Antecedência Mín. (h)</label>
-                            <input type="number" name="min_advance_hours" className="input" value={formData.min_advance_hours} onChange={handleChange} />
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '13px', color: '#8E8E93' }}>Antecedência Mín. (h)</label>
+                            <IOSInput type="number" name="min_advance_hours" value={formData.min_advance_hours} onChange={handleChange} />
                         </div>
                         <div>
-                            <label>Limite Futuro (dias)</label>
-                            <input type="number" name="max_future_days" className="input" value={formData.max_future_days} onChange={handleChange} />
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '13px', color: '#8E8E93' }}>Limite Futuro (dias)</label>
+                            <IOSInput type="number" name="max_future_days" value={formData.max_future_days} onChange={handleChange} />
                         </div>
                     </div>
-                    <div style={{ marginTop: '1rem' }}>
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <div style={{ marginTop: '1.5rem', padding: '1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <span style={{ fontSize: '15px', fontWeight: 600 }}>Possui Acessibilidade?</span>
+                        <label className="switch">
                             <input type="checkbox" name="has_accessibility" checked={formData.has_accessibility} onChange={handleChange} />
-                            Possui Acessibilidade?
+                            <span className="slider round"></span>
                         </label>
                     </div>
-                </section>
+                </IOSCard>
 
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
-                    <button type="submit" className="btn btn-primary" disabled={loading}>
-                        <Save size={18} /> {loading ? 'Salvando...' : 'Salvar Local'}
-                    </button>
+                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <IOSButton type="submit" disabled={loading} style={{ width: 'auto', padding: '12px 32px', fontSize: '16px' }}>
+                        <Save size={20} style={{ marginRight: '0.5rem' }} />
+                        {loading ? 'Salvando...' : 'Salvar Local'}
+                    </IOSButton>
                 </div>
             </form>
+
+            <style>{`
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 30px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #3A3A3C;
+            transition: .4s;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+        }
+        input:checked + .slider {
+            background-color: #30D158;
+        }
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+        .slider.round {
+            border-radius: 34px;
+        }
+        .slider.round:before {
+            border-radius: 50%;
+        }
+      `}</style>
         </div>
     );
 };

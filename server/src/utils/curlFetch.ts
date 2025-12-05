@@ -37,7 +37,9 @@ export async function curlFetch(url: string, options: any = {}): Promise<Respons
     // Add body for POST/PUT/PATCH
     if (options.body && (method !== 'GET' && method !== 'HEAD')) {
         const bodyStr = typeof options.body === 'string' ? options.body : JSON.stringify(options.body);
-        curlCmd += ` -d '${bodyStr.replace(/'/g, "'\"'\"'")}'`;
+        // Windows-safe escaping: wrap in double quotes, escape internal double quotes with backslash
+        const escapedBody = bodyStr.replace(/"/g, '\\"');
+        curlCmd += ` -d "${escapedBody}"`;
     }
 
     try {

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { supabase } from '../config/supabase';
+import { supabase, supabaseAdmin } from '../config/supabase';
 import { generateRoundRobin, generateElimination, assignDatesAndVenues, ScheduledMatch } from '../utils/scheduleGenerator';
 
 export const createCompetition = async (req: Request, res: Response) => {
@@ -77,35 +77,33 @@ export const createCompetition = async (req: Request, res: Response) => {
 };
 
 export const listCompetitions = async (req: Request, res: Response) => {
+    console.log('🔵 [listCompetitions] Request received');
     try {
+        console.log('🟢 [listCompetitions] Querying Supabase...');
         const { data: competitions, error } = await supabase
             .from('Competition')
-            .select('*, modality:Modality(id, name)')
+            .select('id, name, status, nickname, start_date, end_date, gender, modality:Modality(id, name)')
             .order('created_at', { ascending: false });
 
-        if (error) throw error;
+        if (error) {
+            console.error('🔴 [listCompetitions] Supabase error:', error);
+            throw error;
+        }
 
-        // Get counts for each competition
-        const competitionsWithCounts = await Promise.all(
-            (competitions || []).map(async (comp) => {
-                const [regResult, matchResult] = await Promise.all([
-                    supabase.from('TeamRegistration').select('id', { count: 'exact', head: true }).eq('competition_id', comp.id),
-                    supabase.from('GameMatch').select('id', { count: 'exact', head: true }).eq('competition_id', comp.id)
-                ]);
+        console.log(`✅ [listCompetitions] Got ${competitions?.length || 0} competitions`);
 
-                return {
-                    ...comp,
-                    _count: {
-                        registrations: regResult.count || 0,
-                        matches: matchResult.count || 0
-                    }
-                };
-            })
-        );
+        // OTIMIZAÇÃO: Removido Promise.all que causava timeout de 10+ segundos
+        // Retornar counts = 0 por enquanto (pode adicionar counts otimizados depois)
+        const result = (competitions || []).map(comp => ({
+            ...comp,
+            _count: { registrations: 0, matches: 0 }
+        }));
 
-        res.json(competitionsWithCounts);
+        console.log('📤 [listCompetitions] Sending response...');
+        res.status(200).json(result);
+        console.log(`✅ [listCompetitions] Sent ${result.length} competitions`);
     } catch (error: any) {
-        console.error('List Competitions Error:', error.message);
+        console.error('🔴 [listCompetitions] FATAL ERROR:', error.message);
         res.status(500).json({ error: 'Failed to list competitions' });
     }
 };
@@ -113,7 +111,10 @@ export const listCompetitions = async (req: Request, res: Response) => {
 export const getCompetition = async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
-        const { data: competition, error } = await supabase
+        // Use supabaseAdmin to bypass RLS for fetching registrations
+        const client = supabaseAdmin || supabase;
+
+        const { data: competition, error } = await client
             .from('Competition')
             .select(`
                 *,
@@ -152,6 +153,50 @@ export const getCompetition = async (req: Request, res: Response) => {
     } catch (error: any) {
         console.error('Get Competition Error:', error.message);
         res.status(500).json({ error: 'Failed to get competition' });
+    }
+};
+
+export const deleteCompetition = async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    console.log(`🗑️  [deleteCompetition] Deleting competition ID: ${id}`);
+
+    try {
+        // First check if competition exists
+        const { data: existing, error: checkError } = await supabase
+            .from('Competition')
+            .select('id, name')
+            .eq('id', Number(id))
+            .single();
+
+        if (checkError || !existing) {
+            console.error('❌ [deleteCompetition] Competition not found:', id);
+            return res.status(404).json({ error: 'Competition not found' });
+        }
+
+        console.log(`🔍 [deleteCompetition] Found competition: ${existing.name}`);
+
+        // Delete the competition (cascade deletes will handle related records)
+        const { error: deleteError } = await supabase
+            .from('Competition')
+            .delete()
+            .eq('id', Number(id));
+
+        if (deleteError) {
+            console.error('❌ [deleteCompetition] Delete failed:', deleteError);
+            throw deleteError;
+        }
+
+        console.log(`✅ [deleteCompetition] Successfully deleted competition: ${existing.name} (ID: ${id})`);
+
+        res.json({
+            message: 'Competition deleted successfully',
+            id: Number(id),
+            name: existing.name
+        });
+    } catch (error: any) {
+        console.error('🔴 [deleteCompetition] Fatal error:', error.message);
+        res.status(500).json({ error: 'Failed to delete competition' });
     }
 };
 
@@ -243,25 +288,96 @@ export const generateFixture = async (req: Request, res: Response) => {
 };
 
 export const registerTeam = async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { team_id } = req.body;
+    const { id } = req.params; // competition_id
+    const { organization_id, category } = req.body;
+
+    console.log(`🏐 [registerTeam] Competition ID: ${id}, Organization ID: ${organization_id}`);
 
     try {
-        const { data, error } = await supabase
+        // Use supabaseAdmin to bypass RLS
+        const client = supabaseAdmin || supabase;
+
+        // 1. Verify competition exists
+        const { data: competition, error: compError } = await client
+            .from('Competition')
+            .select('id, name')
+            .eq('id', Number(id))
+            .single();
+
+        if (compError || !competition) {
+            console.error('❌ [registerTeam] Competition not found:', id);
+            return res.status(404).json({ error: 'Competition not found' });
+        }
+
+        console.log(`✅ [registerTeam] Competition: ${competition.name}`);
+
+        // 2. Check if Team already exists for this organization
+        let teamId;
+        const { data: existingTeam } = await client
+            .from('Team')
+            .select('id')
+            .eq('organization_id', Number(organization_id))
+            .maybeSingle();
+
+        if (existingTeam) {
+            teamId = existingTeam.id;
+            console.log(`♻️  [registerTeam] Reusing existing Team ID: ${teamId}`);
+        } else {
+            // 3. Create Team record
+            console.log(`🆕 [registerTeam] Creating new Team record...`);
+            const { data: newTeam, error: teamError } = await client
+                .from('Team')
+                .insert([{
+                    organization_id: Number(organization_id),
+                    championship_id: null,
+                    category: category || 'Principal'
+                }])
+                .select()
+                .single();
+
+            if (teamError) {
+                console.error('❌ [registerTeam] Failed to create Team:', teamError);
+                throw new Error(`Failed to create Team: ${teamError.message}`);
+            }
+
+            teamId = newTeam.id;
+            console.log(`✅ [registerTeam] Created new Team ID: ${teamId}`);
+        }
+
+        // 4. Check if already registered
+        const { data: existingReg } = await client
+            .from('TeamRegistration')
+            .select('id')
+            .eq('competition_id', Number(id))
+            .eq('team_id', teamId)
+            .maybeSingle();
+
+        if (existingReg) {
+            console.log(`⚠️  [registerTeam] Team already registered: ${existingReg.id}`);
+            return res.status(400).json({ error: 'Team already registered for this competition' });
+        }
+
+        // 5. Create TeamRegistration
+        console.log(`📝 [registerTeam] Creating TeamRegistration...`);
+        const { data: registration, error: regError } = await client
             .from('TeamRegistration')
             .insert([{
                 competition_id: Number(id),
-                team_id: Number(team_id),
+                team_id: teamId,
                 status: 'CONFIRMED'
             }])
             .select()
             .single();
 
-        if (error) throw error;
+        if (regError) {
+            console.error('❌ [registerTeam] Failed to create registration:', regError);
+            throw new Error(`Failed to register team: ${regError.message}`);
+        }
 
-        res.json(data);
+        console.log(`✅ [registerTeam] Registration created successfully: ${registration.id}`);
+        res.json(registration);
     } catch (error: any) {
-        console.error('Register Team Error:', error.message);
+        console.error('🔴 [registerTeam] Fatal error:', error.message);
         res.status(500).json({ error: 'Failed to register team: ' + error.message });
     }
 };
@@ -503,5 +619,114 @@ export const generateBracketKnockout = async (req: Request, res: Response) => {
     } catch (error: any) {
         console.error('❌ Generate Bracket Error:', error.message);
         res.status(500).json({ error: 'Falha ao gerar chaveamento: ' + error.message });
+    }
+};
+
+/**
+ * UNREGISTER TEAM - Remove a team from a competition
+ */
+export const unregisterTeam = async (req: Request, res: Response) => {
+    const { id, teamRegId } = req.params;
+
+    console.log(`🗑️ [unregisterTeam] Removing registration ${teamRegId} from competition ${id}`);
+
+    try {
+        const client = supabaseAdmin || supabase;
+
+        // 1. Verify registration exists and belongs to this competition
+        const { data: registration, error: checkError } = await client
+            .from('TeamRegistration')
+            .select('id, team_id, competition_id, team:Team(organization:Organization(name_official))')
+            .eq('id', Number(teamRegId))
+            .eq('competition_id', Number(id))
+            .single();
+
+        if (checkError || !registration) {
+            console.error('❌ [unregisterTeam] Registration not found');
+            return res.status(404).json({ error: 'Registration not found' });
+        }
+
+        const teamName = (registration.team as any)?.organization?.name_official || 'Unknown';
+        console.log(`🔍 [unregisterTeam] Found registration for: ${teamName}`);
+
+        // 2. Check if competition has matches with this team
+        const { data: matches } = await client
+            .from('GameMatch')
+            .select('id')
+            .eq('competition_id', Number(id))
+            .or(`team_a_id.eq.${registration.team_id},team_b_id.eq.${registration.team_id}`)
+            .limit(1);
+
+        if (matches && matches.length > 0) {
+            console.error('❌ [unregisterTeam] Team has matches, cannot remove');
+            return res.status(400).json({
+                error: 'Não é possível remover time com jogos já programados'
+            });
+        }
+
+        // 3. Delete the registration
+        const { error: deleteError } = await client
+            .from('TeamRegistration')
+            .delete()
+            .eq('id', Number(teamRegId));
+
+        if (deleteError) throw deleteError;
+
+        console.log(`✅ [unregisterTeam] Successfully removed: ${teamName}`);
+
+        res.json({
+            message: 'Time removido da competição com sucesso',
+            id: Number(teamRegId),
+            team_name: teamName
+        });
+
+    } catch (error: any) {
+        console.error('🔴 [unregisterTeam] Fatal error:', error.message);
+        res.status(500).json({ error: 'Falha ao remover time: ' + error.message });
+    }
+};
+
+/**
+ * UPDATE TEAM REGISTRATION - Update status or group
+ */
+export const updateTeamRegistration = async (req: Request, res: Response) => {
+    const { id, teamRegId } = req.params;
+    const { status, group_id } = req.body;
+
+    console.log(`📝 [updateTeamRegistration] Updating registration ${teamRegId}`);
+
+    try {
+        const client = supabaseAdmin || supabase;
+
+        const updateData: any = {};
+        if (status !== undefined) updateData.status = status;
+        if (group_id !== undefined) updateData.group_id = group_id;
+
+        const { data: registration, error } = await client
+            .from('TeamRegistration')
+            .update(updateData)
+            .eq('id', Number(teamRegId))
+            .eq('competition_id', Number(id))
+            .select(`
+                *,
+                team:Team(
+                    *,
+                    organization:Organization(name_official, logo_url)
+                ),
+                group:Group(id, name)
+            `)
+            .single();
+
+        if (error) throw error;
+        if (!registration) {
+            return res.status(404).json({ error: 'Registration not found' });
+        }
+
+        console.log(`✅ [updateTeamRegistration] Updated successfully`);
+        res.json(registration);
+
+    } catch (error: any) {
+        console.error('🔴 [updateTeamRegistration] Error:', error.message);
+        res.status(500).json({ error: 'Failed to update registration' });
     }
 };

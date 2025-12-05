@@ -1,0 +1,457 @@
+--- INICIANDO SUPABASE (CURL MODE) ---
+1. Ambiente: development
+2. URL: https://deqtlplceaphtindxxtu.supabase.co
+3. KEY (Anon): OK
+4. SERVICE_KEY: OK
+✅ Supabase inicializado (CURL Fetch)
+✅ CPF Validation Service initialized (apicpf.com + local fallback)
+Server is running on http://localhost:3000
+
+🌐 Acesso na rede local:
+   http://192.168.1.101:3000
+   http://192.168.64.1:3000
+
+POST /api/v1/auth/login
+
+=== LOGIN (SUPABASE) ===
+✅ Login bem sucedido: test@test.com
+GET /api/v1/competitions
+🔵 [listCompetitions] Request received
+🟢 [listCompetitions] Querying Supabase...
+✅ [listCompetitions] Got 3 competitions
+📤 [listCompetitions] Sending response...
+✅ [listCompetitions] Sent 3 competitions
+POST /api/v1/organizations
+[createOrganization] req.user: {
+  userId: '9e16dbe6-ee16-4073-a8c5-0f9978b34485',
+  email: 'test@test.com',
+  role: 'USER'
+}
+[createOrganization] manager_user_id from body: undefined
+POST /api/v1/competitions/9/register-team
+🏐 [registerTeam] Competition ID: 9, Organization ID: undefined
+✅ [registerTeam] Competition: Mineiro
+♻️  [registerTeam] Reusing existing Team ID: undefined
+⚠️  [registerTeam] Team already registered: undefined
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+POST /api/v1/auth/login
+
+=== LOGIN (SUPABASE) ===
+✅ Login bem sucedido: test@test.com
+GET /api/v1/competitions
+🔵 [listCompetitions] Request received
+🟢 [listCompetitions] Querying Supabase...
+✅ [listCompetitions] Got 3 competitions
+📤 [listCompetitions] Sending response...
+✅ [listCompetitions] Sent 3 competitions
+POST /api/v1/organizations
+[createOrganization] req.user: {
+  userId: '9e16dbe6-ee16-4073-a8c5-0f9978b34485',
+  email: 'test@test.com',
+  role: 'USER'
+}
+[createOrganization] manager_user_id from body: undefined
+POST /api/v1/competitions/9/register-team
+🏐 [registerTeam] Competition ID: 9, Organization ID: undefined
+✅ [registerTeam] Competition: Mineiro
+♻️  [registerTeam] Reusing existing Team ID: undefined
+⚠️  [registerTeam] Team already registered: undefined
+POST /api/v1/auth/login
+
+=== LOGIN (SUPABASE) ===
+✅ Login bem sucedido: test@test.com
+GET /api/v1/competitions
+🔵 [listCompetitions] Request received
+🟢 [listCompetitions] Querying Supabase...
+✅ [listCompetitions] Got 3 competitions
+📤 [listCompetitions] Sending response...
+✅ [listCompetitions] Sent 3 competitions
+POST /api/v1/organizations
+[createOrganization] req.user: {
+  userId: '9e16dbe6-ee16-4073-a8c5-0f9978b34485',
+  email: 'test@test.com',
+  role: 'USER'
+}
+[createOrganization] manager_user_id from body: undefined
+POST /api/v1/competitions/9/register-team
+🏐 [registerTeam] Competition ID: 9, Organization ID: undefined
+✅ [registerTeam] Competition: Mineiro
+♻️  [registerTeam] Reusing existing Team ID: undefined
+⚠️  [registerTeam] Team already registered: undefined
+POST /api/v1/auth/login
+
+=== LOGIN (SUPABASE) ===
+✅ Login bem sucedido: admin@sistema.com
+GET /api/v1/users/dashboard
+GET /api/v1/users/dashboard
+POST /api/v1/auth/login
+
+=== LOGIN (SUPABASE) ===
+✅ Login bem sucedido: test@test.com
+GET /api/v1/competitions
+🔵 [listCompetitions] Request received
+🟢 [listCompetitions] Querying Supabase...
+✅ [listCompetitions] Got 3 competitions
+📤 [listCompetitions] Sending response...
+✅ [listCompetitions] Sent 3 competitions
+POST /api/v1/organizations
+[createOrganization] req.user: {
+  userId: '9e16dbe6-ee16-4073-a8c5-0f9978b34485',
+  email: 'test@test.com',
+  role: 'USER'
+}
+[createOrganization] manager_user_id from body: undefined
+POST /api/v1/competitions/9/register-team
+🏐 [registerTeam] Competition ID: 9, Organization ID: undefined
+✅ [registerTeam] Competition: Mineiro
+♻️  [registerTeam] Reusing existing Team ID: undefined
+⚠️  [registerTeam] Team already registered: undefined
+POST /api/v1/auth/login
+
+=== LOGIN (SUPABASE) ===
+✅ Login bem sucedido: test@test.com
+GET /api/v1/competitions
+🔵 [listCompetitions] Request received
+🟢 [listCompetitions] Querying Supabase...
+✅ [listCompetitions] Got 3 competitions
+📤 [listCompetitions] Sending response...
+✅ [listCompetitions] Sent 3 competitions
+POST /api/v1/organizations
+[createOrganization] req.user: {
+  userId: '9e16dbe6-ee16-4073-a8c5-0f9978b34485',
+  email: 'test@test.com',
+  role: 'USER'
+}
+[createOrganization] manager_user_id from body: undefined
+POST /api/v1/competitions/9/register-team
+🏐 [registerTeam] Competition ID: 9, Organization ID: undefined
+✅ [registerTeam] Competition: Mineiro
+♻️  [registerTeam] Reusing existing Team ID: undefined
+⚠️  [registerTeam] Team already registered: undefined
+GET /api/v1/competitions
+🔵 [listCompetitions] Request received
+🟢 [listCompetitions] Querying Supabase...
+✅ [listCompetitions] Got 3 competitions
+📤 [listCompetitions] Sending response...
+✅ [listCompetitions] Sent 3 competitions
+GET /api/v1/competitions
+🔵 [listCompetitions] Request received
+🟢 [listCompetitions] Querying Supabase...
+✅ [listCompetitions] Got 3 competitions
+📤 [listCompetitions] Sending response...
+✅ [listCompetitions] Sent 3 competitions
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/organizations
+GET /api/v1/competitions/9
+GET /api/v1/organizations
+POST /api/v1/auth/login
+
+=== LOGIN (SUPABASE) ===
+✅ Login bem sucedido: test@test.com
+GET /api/v1/competitions
+🔵 [listCompetitions] Request received
+🟢 [listCompetitions] Querying Supabase...
+✅ [listCompetitions] Got 3 competitions
+📤 [listCompetitions] Sending response...
+✅ [listCompetitions] Sent 3 competitions
+POST /api/v1/organizations
+[createOrganization] req.user: {
+  userId: '9e16dbe6-ee16-4073-a8c5-0f9978b34485',
+  email: 'test@test.com',
+  role: 'USER'
+}
+[createOrganization] manager_user_id from body: undefined
+POST /api/v1/competitions/9/register-team
+🏐 [registerTeam] Competition ID: 9, Organization ID: 41
+✅ [registerTeam] Competition: Mineiro
+🆕 [registerTeam] Creating new Team record...
+✅ [registerTeam] Created new Team ID: 21
+📝 [registerTeam] Creating TeamRegistration...
+✅ [registerTeam] Registration created successfully: 57
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+POST /api/v1/auth/login
+
+=== LOGIN (SUPABASE) ===
+GET /api/v1/competitions/9
+✅ Login bem sucedido: admin@sistema.com
+GET /api/v1/users/dashboard
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions
+🔵 [listCompetitions] Request received
+🟢 [listCompetitions] Querying Supabase...
+✅ [listCompetitions] Got 3 competitions
+📤 [listCompetitions] Sending response...
+✅ [listCompetitions] Sent 3 competitions
+GET /api/v1/competitions
+🔵 [listCompetitions] Request received
+🟢 [listCompetitions] Querying Supabase...
+✅ [listCompetitions] Got 3 competitions
+📤 [listCompetitions] Sending response...
+✅ [listCompetitions] Sent 3 competitions
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/users/dashboard
+GET /api/v1/organizations
+GET /api/v1/organizations
+POST /api/v1/organizations
+[createOrganization] req.user: {
+  userId: '3da1ce56-3cab-4b9f-b87e-6b4f786a2bd7',
+  email: 'admin@sistema.com',
+  role: 'ADMIN'
+}
+[createOrganization] manager_user_id from body: undefined
+GET /api/v1/organizations
+GET /api/v1/organizations
+POST /api/v1/competitions/9/register-team
+🏐 [registerTeam] Competition ID: 9, Organization ID: 41
+✅ [registerTeam] Competition: Mineiro
+♻️  [registerTeam] Reusing existing Team ID: 21
+⚠️  [registerTeam] Team already registered: 57
+POST /api/v1/organizations
+[createOrganization] req.user: {
+  userId: '3da1ce56-3cab-4b9f-b87e-6b4f786a2bd7',
+  email: 'admin@sistema.com',
+  role: 'ADMIN'
+}
+[createOrganization] manager_user_id from body: undefined
+GET /api/v1/organizations
+GET /api/v1/organizations
+POST /api/v1/competitions/9/draw-groups
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9/fixture
+GET /api/v1/competitions/9/fixture
+POST /api/v1/competitions/9/fixture
+GET /api/v1/organizations
+GET /api/v1/organizations
+GET /api/v1/organizations
+POST /api/v1/organizations
+[createOrganization] req.user: {
+  userId: '3da1ce56-3cab-4b9f-b87e-6b4f786a2bd7',
+  email: 'admin@sistema.com',
+  role: 'ADMIN'
+}
+[createOrganization] manager_user_id from body: undefined
+GET /api/v1/organizations
+GET /api/v1/organizations
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+POST /api/v1/auth/login
+
+=== LOGIN (SUPABASE) ===
+GET /api/v1/competitions/9
+✅ Login bem sucedido: admin@sistema.com
+GET /api/v1/users/dashboard
+GET /api/v1/competitions
+🔵 [listCompetitions] Request received
+🟢 [listCompetitions] Querying Supabase...
+✅ [listCompetitions] Got 3 competitions
+📤 [listCompetitions] Sending response...
+✅ [listCompetitions] Sent 3 competitions
+GET /api/v1/competitions
+🔵 [listCompetitions] Request received
+🟢 [listCompetitions] Querying Supabase...
+✅ [listCompetitions] Got 3 competitions
+📤 [listCompetitions] Sending response...
+✅ [listCompetitions] Sent 3 competitions
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/users/dashboard
+GET /api/v1/organizations
+GET /api/v1/organizations
+POST /api/v1/organizations
+[createOrganization] req.user: {
+  userId: '3da1ce56-3cab-4b9f-b87e-6b4f786a2bd7',
+  email: 'admin@sistema.com',
+  role: 'ADMIN'
+}
+[createOrganization] manager_user_id from body: undefined
+GET /api/v1/organizations
+GET /api/v1/organizations
+POST /api/v1/organizations
+[createOrganization] req.user: {
+  userId: '3da1ce56-3cab-4b9f-b87e-6b4f786a2bd7',
+  email: 'admin@sistema.com',
+  role: 'ADMIN'
+}
+[createOrganization] manager_user_id from body: undefined
+GET /api/v1/organizations
+GET /api/v1/organizations
+GET /api/v1/organizations
+GET /api/v1/organizations
+POST /api/v1/organizations
+[createOrganization] req.user: {
+  userId: '3da1ce56-3cab-4b9f-b87e-6b4f786a2bd7',
+  email: 'admin@sistema.com',
+  role: 'ADMIN'
+}
+[createOrganization] manager_user_id from body: undefined
+GET /api/v1/organizations
+GET /api/v1/organizations
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+POST /api/v1/auth/login
+
+=== LOGIN (SUPABASE) ===
+✅ Login bem sucedido: admin@sistema.com
+GET /api/v1/users/dashboard
+GET /api/v1/competitions
+🔵 [listCompetitions] Request received
+🟢 [listCompetitions] Querying Supabase...
+✅ [listCompetitions] Got 3 competitions
+📤 [listCompetitions] Sending response...
+✅ [listCompetitions] Sent 3 competitions
+GET /api/v1/competitions
+🔵 [listCompetitions] Request received
+🟢 [listCompetitions] Querying Supabase...
+✅ [listCompetitions] Got 3 competitions
+📤 [listCompetitions] Sending response...
+✅ [listCompetitions] Sent 3 competitions
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/organizations
+GET /api/v1/organizations
+GET /api/v1/users/dashboard
+POST /api/v1/organizations
+[createOrganization] req.user: {
+  userId: '3da1ce56-3cab-4b9f-b87e-6b4f786a2bd7',
+  email: 'admin@sistema.com',
+  role: 'ADMIN'
+}
+[createOrganization] manager_user_id from body: undefined
+GET /api/v1/organizations
+GET /api/v1/organizations
+GET /api/v1/organizations
+GET /api/v1/organizations
+POST /api/v1/organizations
+[createOrganization] req.user: {
+  userId: '3da1ce56-3cab-4b9f-b87e-6b4f786a2bd7',
+  email: 'admin@sistema.com',
+  role: 'ADMIN'
+}
+[createOrganization] manager_user_id from body: undefined
+GET /api/v1/organizations
+GET /api/v1/organizations
+GET /api/v1/organizations
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+POST /api/v1/auth/login
+
+=== LOGIN (SUPABASE) ===
+✅ Login bem sucedido: admin@sistema.com
+GET /api/v1/users/dashboard
+GET /api/v1/competitions
+🔵 [listCompetitions] Request received
+🟢 [listCompetitions] Querying Supabase...
+✅ [listCompetitions] Got 3 competitions
+📤 [listCompetitions] Sending response...
+✅ [listCompetitions] Sent 3 competitions
+GET /api/v1/competitions
+🔵 [listCompetitions] Request received
+🟢 [listCompetitions] Querying Supabase...
+✅ [listCompetitions] Got 3 competitions
+📤 [listCompetitions] Sending response...
+✅ [listCompetitions] Sent 3 competitions
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/organizations
+GET /api/v1/organizations
+GET /api/v1/users/dashboard
+POST /api/v1/organizations
+[createOrganization] req.user: {
+  userId: '3da1ce56-3cab-4b9f-b87e-6b4f786a2bd7',
+  email: 'admin@sistema.com',
+  role: 'ADMIN'
+}
+[createOrganization] manager_user_id from body: undefined
+GET /api/v1/organizations
+GET /api/v1/organizations
+GET /api/v1/organizations
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+POST /api/v1/auth/login
+
+=== LOGIN (SUPABASE) ===
+✅ Login bem sucedido: admin@sistema.com
+GET /api/v1/users/dashboard
+GET /api/v1/competitions
+🔵 [listCompetitions] Request received
+🟢 [listCompetitions] Querying Supabase...
+✅ [listCompetitions] Got 3 competitions
+📤 [listCompetitions] Sending response...
+✅ [listCompetitions] Sent 3 competitions
+GET /api/v1/competitions
+🔵 [listCompetitions] Request received
+🟢 [listCompetitions] Querying Supabase...
+✅ [listCompetitions] Got 3 competitions
+📤 [listCompetitions] Sending response...
+✅ [listCompetitions] Sent 3 competitions
+GET /api/v1/users/dashboard
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/competitions/9
+GET /api/v1/organizations
+GET /api/v1/organizations
+POST /api/v1/organizations
+[createOrganization] req.user: {
+  userId: '3da1ce56-3cab-4b9f-b87e-6b4f786a2bd7',
+  email: 'admin@sistema.com',
+  role: 'ADMIN'
+}
+[createOrganization] manager_user_id from body: undefined
+GET /api/v1/organizations
+GET /api/v1/organizations
+POST /api/v1/organizations
+[createOrganization] req.user: {
+  userId: '3da1ce56-3cab-4b9f-b87e-6b4f786a2bd7',
+  email: 'admin@sistema.com',
+  role: 'ADMIN'
+}
+[createOrganization] manager_user_id from body: undefined
+GET /api/v1/organizations
+GET /api/v1/organizations

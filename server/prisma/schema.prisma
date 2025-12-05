@@ -82,12 +82,18 @@ model AuditLog {
 }
 
 model Organization {
-  id              Int    @id @default(autoincrement())
-  name_official   String
-  cnpj            String @unique
-  manager_user_id String
-  manager         User   @relation(fields: [manager_user_id], references: [id])
-  teams           Team[]
+  id                    Int      @id @default(autoincrement())
+  name_official         String
+  cnpj                  String?  @unique
+  manager_user_id       String
+  manager               User     @relation(fields: [manager_user_id], references: [id])
+  
+  team_manager_name     String?
+  team_manager_contact  String?
+  coach_name            String?
+  coach_contact         String?
+  
+  teams                 Team[]
 }
 
 model Championship {
@@ -99,11 +105,11 @@ model Championship {
 }
 
 model Team {
-  id              Int          @id @default(autoincrement())
+  id              Int           @id @default(autoincrement())
   organization_id Int
-  organization    Organization @relation(fields: [organization_id], references: [id])
-  championship_id Int
-  championship    Championship @relation(fields: [championship_id], references: [id])
+  organization    Organization  @relation(fields: [organization_id], references: [id])
+  championship_id Int?
+  championship    Championship? @relation(fields: [championship_id], references: [id])
   category        String
   
   home_matches    Match[]      @relation("HomeTeam")

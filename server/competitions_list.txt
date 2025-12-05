@@ -1,0 +1,14 @@
+--- INICIANDO SUPABASE (CURL MODE) ---
+1. Ambiente: development
+2. URL: https://deqtlplceaphtindxxtu.supabase.co
+3. KEY (Anon): OK
+4. SERVICE_KEY: OK
+Ô£à Supabase inicializado (CURL Fetch)
+Listing competitions...
+Competitions: [
+  {
+    id: 6,
+    name: 'Campeonato Piraporense de Futsal 2025',
+    created_at: '2025-11-24T20:11:58.63'
+  }
+]

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Edit, EyeOff, Loader, Trash2 } from 'lucide-react';
+import { Edit, EyeOff, Loader, Trash2, RefreshCw, Search } from 'lucide-react';
 import { API_BASE_URL } from '../config/api';
+import { IOSCard, IOSButton, IOSInput } from '../components/ui/IOSDesign';
 
 interface User {
     id: string;
@@ -18,12 +19,27 @@ interface User {
 
 const AdminUsers: React.FC = () => {
     const [users, setUsers] = useState<User[]>([]);
+    const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
         fetchUsers();
     }, []);
+
+    useEffect(() => {
+        if (searchTerm.trim() === '') {
+            setFilteredUsers(users);
+        } else {
+            const lower = searchTerm.toLowerCase();
+            setFilteredUsers(users.filter(u =>
+                u.full_name.toLowerCase().includes(lower) ||
+                u.email.toLowerCase().includes(lower) ||
+                u.cpf.includes(lower)
+            ));
+        }
+    }, [searchTerm, users]);
 
     const fetchUsers = async () => {
         setLoading(true);
@@ -54,6 +70,7 @@ const AdminUsers: React.FC = () => {
 
             const data = await res.json();
             setUsers(data);
+            setFilteredUsers(data);
         } catch (err: any) {
             console.error('Error fetching users:', err);
             setError(err.message || 'Erro ao carregar usuários');
@@ -79,7 +96,7 @@ const AdminUsers: React.FC = () => {
 
             if (res.ok) {
                 alert('✅ Usuário anonimizado com sucesso');
-                fetchUsers(); // Refresh list
+                fetchUsers();
             } else {
                 const data = await res.json();
                 alert('❌ Erro: ' + (data.error || 'Falha ao anonimizar usuário'));
@@ -107,7 +124,7 @@ const AdminUsers: React.FC = () => {
 
             if (res.ok) {
                 alert('✅ Usuário removido com sucesso');
-                fetchUsers(); // Refresh list
+                fetchUsers();
             } else {
                 const data = await res.json();
                 alert('❌ Erro: ' + (data.error || 'Falha ao remover usuário'));
@@ -120,182 +137,133 @@ const AdminUsers: React.FC = () => {
 
     if (loading) {
         return (
-            <div className="animate-fade-in" style={{ textAlign: 'center', padding: '3rem' }}>
-                <Loader size={48} className="spin" style={{ margin: '0 auto' }} />
-                <p style={{ marginTop: '1rem', color: 'var(--text-muted)' }}>
-                    Carregando usuários...
-                </p>
+            <div className="animate-fade-in" style={{ textAlign: 'center', padding: '4rem', color: '#8E8E93' }}>
+                <Loader size={48} className="spin" style={{ margin: '0 auto 1rem' }} />
+                <p>Carregando usuários...</p>
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="animate-fade-in">
-                <h1>Gestão de Usuários</h1>
-                <div className="card" style={{
-                    marginTop: '2rem',
-                    padding: '2rem',
-                    background: 'rgba(239, 68, 68, 0.1)',
-                    border: '1px solid rgba(239, 68, 68, 0.5)',
-                    textAlign: 'center'
-                }}>
-                    <p style={{ color: 'var(--danger)', fontSize: '1.1rem' }}>
-                        ⚠️ {error}
-                    </p>
-                    <button
-                        className="btn btn-primary"
-                        onClick={fetchUsers}
-                        style={{ marginTop: '1rem' }}
-                    >
-                        Tentar Novamente
-                    </button>
-                </div>
+            <div className="animate-fade-in" style={{ padding: '2rem', textAlign: 'center' }}>
+                <h1 style={{ marginBottom: '2rem' }}>Gestão de Usuários</h1>
+                <IOSCard style={{ background: 'rgba(255, 69, 58, 0.1)', borderColor: 'rgba(255, 69, 58, 0.3)' }}>
+                    <p style={{ color: '#FF453A', fontSize: '17px', marginBottom: '1rem' }}>⚠️ {error}</p>
+                    <IOSButton onClick={fetchUsers}>Tentar Novamente</IOSButton>
+                </IOSCard>
             </div>
         );
     }
 
     return (
-        <div className="animate-fade-in">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <h1>Gestão de Usuários</h1>
-                <button className="btn btn-primary" onClick={fetchUsers}>
-                    Atualizar Lista
-                </button>
+        <div className="animate-fade-in" style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                <div>
+                    <h1 style={{ fontSize: '34px', fontWeight: 800, margin: 0 }}>Usuários</h1>
+                    <p style={{ color: '#8E8E93', fontSize: '15px', marginTop: '0.5rem' }}>
+                        Total: {users.length} • Anonimizados: {users.filter(u => u.is_obfuscated).length}
+                    </p>
+                </div>
+                <IOSButton onClick={fetchUsers} style={{ padding: '0.5rem' }}>
+                    <RefreshCw size={20} />
+                </IOSButton>
             </div>
 
-            <div className="card">
-                {users.length === 0 ? (
-                    <div style={{ padding: '3rem', textAlign: 'center' }}>
-                        <p style={{ color: 'var(--text-muted)' }}>
-                            Nenhum usuário encontrado
-                        </p>
+            <div style={{ marginBottom: '2rem', position: 'relative' }}>
+                <Search size={20} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#8E8E93' }} />
+                <IOSInput
+                    placeholder="Buscar por nome, email ou CPF..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    style={{ paddingLeft: '40px' }}
+                />
+            </div>
+
+            <div style={{ display: 'grid', gap: '1rem' }}>
+                {filteredUsers.length === 0 ? (
+                    <div style={{ padding: '3rem', textAlign: 'center', color: '#8E8E93' }}>
+                        Nenhum usuário encontrado
                     </div>
                 ) : (
-                    <div style={{ overflowX: 'auto' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                            <thead>
-                                <tr style={{
-                                    textAlign: 'left',
-                                    borderBottom: '2px solid var(--surface-light)'
-                                }}>
-                                    <th style={{ padding: '1rem' }}>Nome</th>
-                                    <th style={{ padding: '1rem' }}>Email</th>
-                                    <th style={{ padding: '1rem' }}>CPF</th>
-                                    <th style={{ padding: '1rem' }}>Cidade/UF</th>
-                                    <th style={{ padding: '1rem' }}>Status RF</th>
-                                    <th style={{ padding: '1rem' }}>Função</th>
-                                    <th style={{ padding: '1rem' }}>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {users.map(user => (
-                                    <tr
-                                        key={user.id}
-                                        style={{
-                                            borderBottom: '1px solid var(--surface-light)',
-                                            opacity: user.is_obfuscated ? 0.5 : 1,
-                                            background: user.is_obfuscated ? 'rgba(128, 128, 128, 0.05)' : 'transparent'
-                                        }}
-                                    >
-                                        <td style={{ padding: '1rem' }}>
+                    filteredUsers.map(user => (
+                        <IOSCard
+                            key={user.id}
+                            style={{
+                                padding: '1.25rem',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '1rem',
+                                opacity: user.is_obfuscated ? 0.6 : 1,
+                                background: user.is_obfuscated ? 'rgba(28, 28, 30, 0.4)' : undefined
+                            }}
+                        >
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                    <div style={{
+                                        width: '48px', height: '48px', borderRadius: '50%',
+                                        background: user.is_obfuscated ? '#8E8E93' : '#0A84FF',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        color: 'white', fontWeight: 'bold', fontSize: '18px'
+                                    }}>
+                                        {user.full_name.charAt(0).toUpperCase()}
+                                    </div>
+                                    <div>
+                                        <div style={{ fontWeight: 700, fontSize: '17px', color: 'white' }}>
                                             {user.full_name}
-                                            {user.is_obfuscated && (
-                                                <span style={{
-                                                    marginLeft: '0.5rem',
-                                                    fontSize: '0.75rem',
-                                                    color: 'var(--text-muted)'
-                                                }}>
-                                                    (Anonimizado)
-                                                </span>
-                                            )}
-                                        </td>
-                                        <td style={{ padding: '1rem', fontSize: '0.875rem' }}>
-                                            {user.email}
-                                        </td>
-                                        <td style={{ padding: '1rem', fontSize: '0.875rem', fontFamily: 'monospace' }}>
-                                            {user.cpf}
-                                        </td>
-                                        <td style={{ padding: '1rem', fontSize: '0.875rem' }}>
-                                            {user.city && user.state
-                                                ? `${user.city}/${user.state}`
-                                                : user.city || user.state || '-'}
-                                        </td>
-                                        <td style={{ padding: '1rem' }}>
-                                            <span style={{
-                                                padding: '0.25rem 0.5rem',
-                                                borderRadius: '999px',
-                                                fontSize: '0.75rem',
-                                                fontWeight: 'bold',
-                                                background: user.rf_status === 'VALID'
-                                                    ? 'var(--success)'
-                                                    : user.rf_status === 'INVALID'
-                                                        ? 'var(--danger)'
-                                                        : 'var(--warning)',
-                                                color: 'white'
-                                            }}>
-                                                {user.rf_status}
-                                            </span>
-                                        </td>
-                                        <td style={{ padding: '1rem' }}>
-                                            <span style={{
-                                                padding: '0.25rem 0.5rem',
-                                                borderRadius: '0.25rem',
-                                                fontSize: '0.75rem',
-                                                background: user.role === 'ADMIN'
-                                                    ? 'var(--primary)'
-                                                    : 'var(--secondary)',
-                                                color: 'var(--text)'
-                                            }}>
-                                                {user.role}
-                                            </span>
-                                        </td>
-                                        <td style={{ padding: '1rem' }}>
-                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                <button
-                                                    className="btn-secondary btn-icon"
-                                                    title="Editar usuário"
-                                                >
-                                                    <Edit size={16} />
-                                                </button>
-                                                {!user.is_obfuscated && (
-                                                    <button
-                                                        className="btn-icon"
-                                                        style={{ color: 'var(--danger)' }}
-                                                        onClick={() => handleObfuscate(user.id, user.full_name)}
-                                                        title="Anonimizar dados (LGPD)"
-                                                    >
-                                                        <EyeOff size={16} />
-                                                    </button>
-                                                )}
-                                                <button
-                                                    className="btn-icon"
-                                                    style={{ color: 'var(--danger)' }}
-                                                    onClick={() => handleDelete(user.id, user.full_name)}
-                                                    title="Excluir usuário"
-                                                >
-                                                    <Trash2 size={16} />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
-            </div>
+                                            {user.is_obfuscated && <span style={{ fontSize: '12px', color: '#8E8E93', marginLeft: '0.5rem' }}>(Anonimizado)</span>}
+                                        </div>
+                                        <div style={{ fontSize: '14px', color: '#8E8E93' }}>{user.email}</div>
+                                        <div style={{ fontSize: '13px', color: '#636366', fontFamily: 'monospace' }}>{user.cpf}</div>
+                                    </div>
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
+                                    <span style={{
+                                        padding: '4px 8px', borderRadius: '6px', fontSize: '12px', fontWeight: 600,
+                                        background: user.role === 'ADMIN' ? '#0A84FF' : 'rgba(255,255,255,0.1)',
+                                        color: user.role === 'ADMIN' ? 'white' : '#8E8E93'
+                                    }}>
+                                        {user.role}
+                                    </span>
+                                    <span style={{
+                                        padding: '4px 8px', borderRadius: '6px', fontSize: '12px', fontWeight: 600,
+                                        background: user.rf_status === 'VALID' ? '#30D158' : user.rf_status === 'INVALID' ? '#FF453A' : '#FF9F0A',
+                                        color: 'white'
+                                    }}>
+                                        {user.rf_status}
+                                    </span>
+                                </div>
+                            </div>
 
-            <div style={{
-                marginTop: '1rem',
-                padding: '1rem',
-                background: 'rgba(59, 130, 246, 0.1)',
-                borderRadius: '0.5rem',
-                fontSize: '0.875rem',
-                color: 'var(--text-muted)'
-            }}>
-                <strong>Total de usuários:</strong> {users.length} |
-                <strong> Anonimizados:</strong> {users.filter(u => u.is_obfuscated).length}
+                            <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <div style={{ fontSize: '13px', color: '#8E8E93' }}>
+                                    {user.city && user.state ? `${user.city}/${user.state}` : 'Localização não informada'}
+                                </div>
+                                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                                    <IOSButton variant="secondary" style={{ padding: '6px 12px', fontSize: '13px' }}>
+                                        <Edit size={14} /> Editar
+                                    </IOSButton>
+                                    {!user.is_obfuscated && (
+                                        <IOSButton
+                                            variant="danger"
+                                            onClick={() => handleObfuscate(user.id, user.full_name)}
+                                            style={{ padding: '6px 12px', fontSize: '13px' }}
+                                        >
+                                            <EyeOff size={14} />
+                                        </IOSButton>
+                                    )}
+                                    <IOSButton
+                                        variant="danger"
+                                        onClick={() => handleDelete(user.id, user.full_name)}
+                                        style={{ padding: '6px 12px', fontSize: '13px' }}
+                                    >
+                                        <Trash2 size={14} />
+                                    </IOSButton>
+                                </div>
+                            </div>
+                        </IOSCard>
+                    ))
+                )}
             </div>
         </div>
     );

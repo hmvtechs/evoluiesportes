@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { X, Search, Plus, UserPlus, Trash2 } from 'lucide-react';
+import { Search, Plus, UserPlus, Trash2, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { API_BASE_URL } from '../config/api';
+import { IOSModal, IOSSegmentedControl, IOSInput, IOSButton } from './ui/IOSDesign';
 
 interface User {
     id: string;
@@ -144,263 +145,138 @@ const AthleteRosterModal: React.FC<AthleteRosterModalProps> = ({ teamRegistratio
     });
 
     return (
-        <div
-            style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background: 'rgba(0, 0, 0, 0.5)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                zIndex: 1000,
-                padding: '1rem'
-            }}
-            onClick={onClose}
-        >
-            <div
-                className="card"
-                style={{
-                    maxWidth: '700px',
-                    width: '100%',
-                    maxHeight: '85vh',
-                    display: 'flex',
-                    flexDirection: 'column'
-                }}
-                onClick={(e) => e.stopPropagation()}
-            >
-                {/* Header */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                    <h3 style={{ margin: 0 }}>Gestão de Elenco</h3>
-                    <button
-                        onClick={onClose}
-                        className="btn-icon"
-                        style={{ width: '32px', height: '32px' }}
-                    >
-                        <X size={20} />
-                    </button>
-                </div>
+        <IOSModal isOpen={true} onClose={onClose} title="Gestão de Elenco">
+            <div style={{ marginBottom: '1.5rem' }}>
+                <IOSSegmentedControl
+                    options={[
+                        { value: 'list', label: `Elenco (${athletes.length})` },
+                        { value: 'add', label: 'Adicionar Atleta' }
+                    ]}
+                    value={activeTab}
+                    onChange={(val) => setActiveTab(val as any)}
+                />
+            </div>
 
-                {/* Tabs */}
-                <div style={{ display: 'flex', borderBottom: '1px solid var(--border-color)', marginBottom: '1.5rem' }}>
-                    <button
-                        onClick={() => setActiveTab('list')}
-                        style={{
-                            padding: '0.75rem 1.5rem',
-                            border: 'none',
-                            background: 'none',
-                            borderBottom: activeTab === 'list' ? '2px solid var(--primary)' : 'none',
-                            color: activeTab === 'list' ? 'var(--primary)' : 'var(--text-muted)',
-                            fontWeight: activeTab === 'list' ? 'bold' : 'normal',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        Elenco ({athletes.length})
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('add')}
-                        style={{
-                            padding: '0.75rem 1.5rem',
-                            border: 'none',
-                            background: 'none',
-                            borderBottom: activeTab === 'add' ? '2px solid var(--primary)' : 'none',
-                            color: activeTab === 'add' ? 'var(--primary)' : 'var(--text-muted)',
-                            fontWeight: activeTab === 'add' ? 'bold' : 'normal',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem'
-                        }}
-                    >
-                        <UserPlus size={16} />
-                        Adicionar Atleta
-                    </button>
-                </div>
-
-                {/* Content */}
-                <div style={{ flex: 1, overflowY: 'auto' }}>
-                    {activeTab === 'list' && (
-                        <div>
-                            {loading ? (
-                                <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
-                                    Carregando...
-                                </div>
-                            ) : athletes.length === 0 ? (
-                                <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
-                                    Nenhum atleta inscrito ainda.
-                                    <br />
-                                    <button
-                                        className="btn-primary"
-                                        onClick={() => setActiveTab('add')}
-                                        style={{ marginTop: '1rem' }}
-                                    >
-                                        <Plus size={16} />
-                                        Adicionar Primeiro Atleta
-                                    </button>
-                                </div>
-                            ) : (
-                                <table style={{ width: '100%' }}>
-                                    <thead>
-                                        <tr style={{ borderBottom: '2px solid var(--surface-light)' }}>
-                                            <th style={{ textAlign: 'left', padding: '0.5rem' }}>Nome</th>
-                                            <th style={{ textAlign: 'left', padding: '0.5rem' }}>CPF</th>
-                                            <th style={{ textAlign: 'left', padding: '0.5rem' }}>Status</th>
-                                            <th style={{ textAlign: 'center', padding: '0.5rem' }}>Ações</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {athletes.map(athlete => (
-                                            <tr key={athlete.id} style={{ borderBottom: '1px solid var(--surface-light)' }}>
-                                                <td style={{ padding: '0.75rem' }}>{athlete.user.full_name}</td>
-                                                <td style={{ padding: '0.75rem', fontFamily: 'monospace', fontSize: '0.875rem' }}>
-                                                    {athlete.user.cpf}
-                                                </td>
-                                                <td style={{ padding: '0.75rem' }}>
-                                                    <span style={{
-                                                        padding: '0.25rem 0.5rem',
-                                                        borderRadius: '4px',
-                                                        fontSize: '0.75rem',
-                                                        background: athlete.status === 'VALID' ? 'var(--success-light)' : 'var(--warning-light)',
-                                                        color: athlete.status === 'VALID' ? 'var(--success)' : 'var(--warning)'
-                                                    }}>
-                                                        {athlete.status}
-                                                    </span>
-                                                </td>
-                                                <td style={{ padding: '0.75rem', textAlign: 'center' }}>
-                                                    <button
-                                                        onClick={() => handleRemoveAthlete(athlete.user.id)}
-                                                        className="btn-icon"
-                                                        style={{ color: 'var(--danger)' }}
-                                                        title="Remover atleta"
-                                                    >
-                                                        <Trash2 size={16} />
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            )}
-                        </div>
-                    )}
-
-                    {activeTab === 'add' && (
-                        <div>
-                            {/* Search */}
-                            <div style={{ position: 'relative', marginBottom: '1rem' }}>
-                                <Search
-                                    size={18}
-                                    style={{
-                                        position: 'absolute',
-                                        left: '0.75rem',
-                                        top: '50%',
-                                        transform: 'translateY(-50%)',
-                                        color: 'var(--text-muted)'
-                                    }}
-                                />
-                                <input
-                                    type="text"
-                                    placeholder="Digite nome ou CPF para buscar (mín. 2 caracteres)..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.75rem 0.75rem 0.75rem 2.5rem',
-                                        border: '1px solid var(--border-color)',
-                                        borderRadius: '8px',
-                                        fontSize: '0.875rem'
-                                    }}
-                                />
+            <div style={{ flex: 1, overflowY: 'auto', minHeight: '300px' }}>
+                {activeTab === 'list' && (
+                    <div>
+                        {loading ? (
+                            <div style={{ textAlign: 'center', padding: '2rem', color: '#8E8E93' }}>
+                                Carregando...
                             </div>
-
-                            {/* User List */}
-                            <div
-                                style={{
-                                    border: '1px solid var(--border-color)',
-                                    borderRadius: '8px',
-                                    marginBottom: '1rem',
-                                    maxHeight: '400px',
-                                    overflowY: 'auto'
-                                }}
-                            >
-                                {filteredUsers.length === 0 ? (
-                                    <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                                        {searchTerm.length < 2
-                                            ? 'Digite pelo menos 2 caracteres para buscar atletas por nome ou CPF'
-                                            : 'Nenhum usuário encontrado com este critério de busca'}
-                                    </div>
-                                ) : (
-                                    filteredUsers.map(user => (
-                                        <div
-                                            key={user.id}
-                                            onClick={() => setSelectedUserId(user.id)}
-                                            style={{
-                                                padding: '1rem',
-                                                cursor: 'pointer',
-                                                borderBottom: '1px solid var(--border-color)',
-                                                background: selectedUserId === user.id ? 'var(--primary-light)' : 'transparent',
-                                                transition: 'background 0.2s'
-                                            }}
-                                            onMouseEnter={(e) => {
-                                                if (selectedUserId !== user.id) {
-                                                    e.currentTarget.style.background = 'var(--surface-light)';
-                                                }
-                                            }}
-                                            onMouseLeave={(e) => {
-                                                if (selectedUserId !== user.id) {
-                                                    e.currentTarget.style.background = 'transparent';
-                                                }
-                                            }}
-                                        >
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                                <div
-                                                    style={{
-                                                        width: '20px',
-                                                        height: '20px',
-                                                        borderRadius: '50%',
-                                                        border: `2px solid ${selectedUserId === user.id ? 'var(--primary)' : 'var(--border-color)'}`,
-                                                        background: selectedUserId === user.id ? 'var(--primary)' : 'transparent',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        flexShrink: 0
-                                                    }}
-                                                >
-                                                    {selectedUserId === user.id && (
-                                                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'white' }} />
-                                                    )}
-                                                </div>
-                                                <div style={{ flex: 1 }}>
-                                                    <div style={{ fontWeight: selectedUserId === user.id ? 'bold' : 'normal' }}>
-                                                        {user.full_name}
-                                                    </div>
-                                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
-                                                        CPF: {user.cpf}
-                                                    </div>
-                                                </div>
+                        ) : athletes.length === 0 ? (
+                            <div style={{ textAlign: 'center', padding: '3rem', color: '#8E8E93' }}>
+                                <User size={48} style={{ marginBottom: '1rem', opacity: 0.5 }} />
+                                <p>Nenhum atleta inscrito ainda.</p>
+                                <IOSButton onClick={() => setActiveTab('add')} style={{ marginTop: '1rem' }}>
+                                    Adicionar Primeiro Atleta
+                                </IOSButton>
+                            </div>
+                        ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                {athletes.map((athlete, index) => (
+                                    <div key={athlete.id} style={{
+                                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                        padding: '1rem 0',
+                                        borderBottom: index < athletes.length - 1 ? '1px solid rgba(255,255,255,0.1)' : 'none'
+                                    }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                            <div style={{
+                                                width: '40px', height: '40px', borderRadius: '50%',
+                                                background: 'rgba(255,255,255,0.1)',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                color: 'white', fontWeight: 'bold'
+                                            }}>
+                                                {athlete.user.full_name.charAt(0).toUpperCase()}
+                                            </div>
+                                            <div>
+                                                <div style={{ fontWeight: 600, color: 'white' }}>{athlete.user.full_name}</div>
+                                                <div style={{ fontSize: '13px', color: '#8E8E93', fontFamily: 'monospace' }}>{athlete.user.cpf}</div>
                                             </div>
                                         </div>
-                                    ))
-                                )}
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                            <span style={{
+                                                fontSize: '12px', fontWeight: 600,
+                                                color: athlete.status === 'VALID' ? '#30D158' : '#FF9F0A'
+                                            }}>
+                                                {athlete.status}
+                                            </span>
+                                            <button
+                                                onClick={() => handleRemoveAthlete(athlete.user.id)}
+                                                style={{ background: 'none', border: 'none', color: '#FF453A', cursor: 'pointer', padding: '4px' }}
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
+                        )}
+                    </div>
+                )}
 
-                            {/* Action Button */}
-                            <button
-                                className="btn-primary"
-                                onClick={handleAddAthlete}
-                                disabled={!selectedUserId || submitting}
-                                style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
-                            >
-                                <Plus size={16} />
-                                {submitting ? 'Adicionando...' : 'Adicionar Atleta'}
-                            </button>
+                {activeTab === 'add' && (
+                    <div>
+                        <div style={{ position: 'relative', marginBottom: '1rem' }}>
+                            <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#8E8E93' }} />
+                            <IOSInput
+                                placeholder="Buscar por nome ou CPF..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                style={{ paddingLeft: '40px' }}
+                            />
                         </div>
-                    )}
-                </div>
+
+                        <div style={{ maxHeight: '300px', overflowY: 'auto', marginBottom: '1rem' }}>
+                            {filteredUsers.length === 0 ? (
+                                <div style={{ padding: '2rem', textAlign: 'center', color: '#8E8E93', fontSize: '14px' }}>
+                                    {searchTerm.length < 2
+                                        ? 'Digite pelo menos 2 caracteres para buscar'
+                                        : 'Nenhum usuário encontrado'}
+                                </div>
+                            ) : (
+                                filteredUsers.map(user => (
+                                    <div
+                                        key={user.id}
+                                        onClick={() => setSelectedUserId(user.id)}
+                                        style={{
+                                            padding: '0.75rem',
+                                            cursor: 'pointer',
+                                            borderRadius: '10px',
+                                            marginBottom: '0.5rem',
+                                            background: selectedUserId === user.id ? '#0A84FF' : 'rgba(255,255,255,0.05)',
+                                            display: 'flex', alignItems: 'center', gap: '0.75rem'
+                                        }}
+                                    >
+                                        <div style={{
+                                            width: '32px', height: '32px', borderRadius: '50%',
+                                            background: selectedUserId === user.id ? 'white' : 'rgba(255,255,255,0.1)',
+                                            color: selectedUserId === user.id ? '#0A84FF' : 'white',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '14px'
+                                        }}>
+                                            {user.full_name.charAt(0).toUpperCase()}
+                                        </div>
+                                        <div>
+                                            <div style={{ fontWeight: 600, color: 'white', fontSize: '14px' }}>{user.full_name}</div>
+                                            <div style={{ fontSize: '12px', color: selectedUserId === user.id ? 'rgba(255,255,255,0.8)' : '#8E8E93' }}>CPF: {user.cpf}</div>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+
+                        <IOSButton
+                            onClick={handleAddAthlete}
+                            disabled={!selectedUserId || submitting}
+                            style={{ width: '100%', justifyContent: 'center' }}
+                        >
+                            <Plus size={18} style={{ marginRight: '0.5rem' }} />
+                            {submitting ? 'Adicionando...' : 'Adicionar Atleta'}
+                        </IOSButton>
+                    </div>
+                )}
             </div>
-        </div>
+        </IOSModal>
     );
 };
 

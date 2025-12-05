@@ -1,0 +1,28 @@
+--- INICIANDO SUPABASE (CURL MODE) ---
+1. Ambiente: development
+2. URL: https://deqtlplceaphtindxxtu.supabase.co
+3. KEY (Anon): OK
+4. SERVICE_KEY: OK
+Ô£à Supabase inicializado (CURL Fetch)
+Creating competition directly in DB...
+Supabase Admin configured.
+Ô£à Competition created: {
+  id: 7,
+  name: 'Torneio Teste 2026',
+  nickname: null,
+  start_date: '2026-01-01T00:00:00',
+  end_date: '2026-02-01T00:00:00',
+  modality_id: 5,
+  gender: 'MALE',
+  status: 'DRAFT',
+  is_public: false,
+  regulation_pdf_url: null,
+  competition_type: 'ROUND_ROBIN',
+  min_athletes: null,
+  max_athletes: null,
+  min_age: null,
+  max_age: null,
+  created_at: '2025-11-27T01:55:48.516',
+  updated_at: '2025-11-27T01:55:47.695'
+}
+COMPETITION_ID: 7

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { API_BASE_URL } from '../config/api';
+import { IOSCard } from './ui/IOSDesign';
+import { Calendar, MapPin, Clock } from 'lucide-react';
 
 interface Match {
     id: number;
@@ -44,76 +46,72 @@ const FixtureTable: React.FC = () => {
     };
 
     if (loading) {
-        return <div style={{ padding: '2rem' }}>Carregando fixture...</div>;
+        return <div style={{ padding: '2rem', textAlign: 'center', color: '#8E8E93' }}>Carregando jogos...</div>;
     }
 
     if (rounds.length === 0) {
         return (
-            <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                <p>Nenhum jogo gerado ainda. Clique em "Gerar Fixture" para criar a tabela.</p>
+            <div style={{ padding: '4rem', textAlign: 'center', color: '#8E8E93' }}>
+                <p>Nenhum jogo gerado ainda.</p>
+                <p style={{ fontSize: '14px', marginTop: '0.5rem' }}>Acesse a aba "Grupos" para gerar a tabela.</p>
             </div>
         );
     }
 
     return (
-        <div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             {rounds.map(round => (
-                <div key={round.round_number} style={{ marginBottom: '2rem' }}>
-                    <h4 style={{
-                        padding: '0.75rem 1rem',
-                        background: 'var(--surface-light)',
-                        borderRadius: '8px',
-                        marginBottom: '1rem'
+                <div key={round.round_number}>
+                    <h3 style={{
+                        fontSize: '17px', fontWeight: 600, color: '#8E8E93',
+                        marginBottom: '1rem', paddingLeft: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px'
                     }}>
                         Rodada {round.round_number}
-                    </h4>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <thead>
-                            <tr style={{ borderBottom: '2px solid var(--surface-light)' }}>
-                                <th style={{ textAlign: 'left', padding: '0.75rem' }}>Data/Hora</th>
-                                <th style={{ textAlign: 'left', padding: '0.75rem' }}>Time A</th>
-                                <th style={{ textAlign: 'center', padding: '0.75rem' }}>Placar</th>
-                                <th style={{ textAlign: 'right', padding: '0.75rem' }}>Time B</th>
-                                <th style={{ textAlign: 'left', padding: '0.75rem' }}>Local</th>
-                                <th style={{ textAlign: 'left', padding: '0.75rem' }}>Grupo</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {round.matches.map(match => (
-                                <tr key={match.id} style={{ borderBottom: '1px solid var(--surface-light)' }}>
-                                    <td style={{ padding: '0.75rem', fontSize: '0.875rem' }}>
-                                        {match.scheduled_date ? (
+                    </h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
+                        {round.matches.map(match => (
+                            <IOSCard key={match.id} style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', color: '#8E8E93' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        <Calendar size={12} />
+                                        {match.scheduled_date ? new Date(match.scheduled_date).toLocaleDateString('pt-BR') : 'Data a definir'}
+                                        {match.scheduled_date && (
                                             <>
-                                                <div>{new Date(match.scheduled_date).toLocaleDateString('pt-BR')}</div>
-                                                <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
-                                                    {new Date(match.scheduled_date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                                                </div>
+                                                <span style={{ margin: '0 4px' }}>•</span>
+                                                <Clock size={12} />
+                                                {new Date(match.scheduled_date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                                             </>
-                                        ) : (
-                                            <em style={{ color: 'var(--text-muted)' }}>A definir</em>
                                         )}
-                                    </td>
-                                    <td style={{ padding: '0.75rem', fontWeight: '500' }}>
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        {match.group && <span style={{ background: 'rgba(255,255,255,0.1)', padding: '2px 6px', borderRadius: '4px' }}>{match.group.name}</span>}
+                                    </div>
+                                </div>
+
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                    <div style={{ flex: 1, textAlign: 'right', fontWeight: 600, fontSize: '15px' }}>
                                         {match.team_a.name}
-                                    </td>
-                                    <td style={{ padding: '0.75rem', textAlign: 'center', fontWeight: 'bold' }}>
-                                        {match.score_a !== null && match.score_b !== null
-                                            ? `${match.score_a} x ${match.score_b}`
-                                            : '-'}
-                                    </td>
-                                    <td style={{ padding: '0.75rem', fontWeight: '500', textAlign: 'right' }}>
+                                    </div>
+                                    <div style={{
+                                        margin: '0 1rem', padding: '0.5rem 1rem',
+                                        background: 'rgba(0,0,0,0.3)', borderRadius: '8px',
+                                        fontWeight: 700, fontSize: '18px', fontFamily: 'monospace',
+                                        minWidth: '80px', textAlign: 'center'
+                                    }}>
+                                        {match.score_a !== null ? match.score_a : '-'} : {match.score_b !== null ? match.score_b : '-'}
+                                    </div>
+                                    <div style={{ flex: 1, textAlign: 'left', fontWeight: 600, fontSize: '15px' }}>
                                         {match.team_b.name}
-                                    </td>
-                                    <td style={{ padding: '0.75rem', fontSize: '0.875rem' }}>
-                                        {match.venue?.name || <em style={{ color: 'var(--text-muted)' }}>Não definido</em>}
-                                    </td>
-                                    <td style={{ padding: '0.75rem', fontSize: '0.875rem' }}>
-                                        {match.group?.name || '-'}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                                    </div>
+                                </div>
+
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '13px', color: '#8E8E93', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '0.75rem' }}>
+                                    <MapPin size={14} />
+                                    {match.venue ? match.venue.name : 'Local a definir'}
+                                </div>
+                            </IOSCard>
+                        ))}
+                    </div>
                 </div>
             ))}
         </div>
