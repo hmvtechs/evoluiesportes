@@ -6,6 +6,7 @@ export interface Module {
     path: string;
     icon: any;
     roles: string[]; // 'ADMIN', 'USER', 'STAFF', 'ALL'
+    color?: string; // Optional color for module icon background
 }
 
 export const MODULES: Module[] = [
