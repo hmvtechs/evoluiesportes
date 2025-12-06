@@ -7,7 +7,9 @@ const supabase_1 = require("../config/supabase");
  */
 const listOrganizations = async (req, res) => {
     try {
-        const { data: organizations, error } = await supabase_1.supabase
+        // Use supabaseAdmin if available to bypass RLS, otherwise fallback to anon client
+        const client = supabase_1.supabaseAdmin || supabase_1.supabase;
+        const { data: organizations, error } = await client
             .from('Organization')
             .select('*')
             .order('name_official', { ascending: true });
@@ -27,7 +29,9 @@ exports.listOrganizations = listOrganizations;
 const getOrganization = async (req, res) => {
     const { id } = req.params;
     try {
-        const { data: organization, error } = await supabase_1.supabase
+        // Use supabaseAdmin if available to bypass RLS, otherwise fallback to anon client
+        const client = supabase_1.supabaseAdmin || supabase_1.supabase;
+        const { data: organization, error } = await client
             .from('Organization')
             .select('*')
             .eq('id', Number(id))
@@ -48,27 +52,41 @@ exports.getOrganization = getOrganization;
  * CREATE ORGANIZATION
  */
 const createOrganization = async (req, res) => {
-    const { name_official, cnpj, manager_user_id } = req.body;
+    const { name_official, cnpj, manager_user_id, team_manager_name, team_manager_contact, coach_name, coach_contact, logo_url } = req.body;
     if (!name_official) {
         return res.status(400).json({ error: 'name_official is required' });
     }
     try {
-        const { data: organization, error } = await supabase_1.supabase
+        // manager_user_id is now OPTIONAL - use provided value, authenticated user, or null
+        const managerId = manager_user_id || req.user?.userId || null;
+        console.log('[createOrganization] Creating org with managerId:', managerId);
+        const { data: organization, error } = await (supabase_1.supabaseAdmin || supabase_1.supabase)
             .from('Organization')
             .insert([{
                 name_official,
-                cnpj: cnpj || '00.000.000/0000-00',
-                manager_user_id: manager_user_id || null
+                cnpj: cnpj || null,
+                manager_user_id: managerId, // Can be null now
+                team_manager_name: team_manager_name || null,
+                team_manager_contact: team_manager_contact || null,
+                coach_name: coach_name || null,
+                coach_contact: coach_contact || null,
+                logo_url: logo_url || null
             }])
             .select()
             .single();
-        if (error)
+        if (error) {
+            console.error('Create Organization Error:', error);
+            // Check for unique constraint violation
+            if (error.code === '23505') {
+                return res.status(400).json({ error: 'CNPJ já cadastrado' });
+            }
             throw error;
+        }
         res.status(201).json(organization);
     }
     catch (error) {
         console.error('Create Organization Error:', error.message);
-        res.status(500).json({ error: 'Failed to create organization' });
+        res.status(500).json({ error: 'Failed to create organization: ' + error.message });
     }
 };
 exports.createOrganization = createOrganization;
@@ -77,14 +95,24 @@ exports.createOrganization = createOrganization;
  */
 const updateOrganization = async (req, res) => {
     const { id } = req.params;
-    const { name_official, cnpj } = req.body;
+    const { name_official, cnpj, team_manager_name, team_manager_contact, coach_name, coach_contact, logo_url } = req.body;
     try {
         const updateData = {};
         if (name_official !== undefined)
             updateData.name_official = name_official;
         if (cnpj !== undefined)
             updateData.cnpj = cnpj;
-        const { data: organization, error } = await supabase_1.supabase
+        if (team_manager_name !== undefined)
+            updateData.team_manager_name = team_manager_name;
+        if (team_manager_contact !== undefined)
+            updateData.team_manager_contact = team_manager_contact;
+        if (coach_name !== undefined)
+            updateData.coach_name = coach_name;
+        if (coach_contact !== undefined)
+            updateData.coach_contact = coach_contact;
+        if (logo_url !== undefined)
+            updateData.logo_url = logo_url;
+        const { data: organization, error } = await (supabase_1.supabaseAdmin || supabase_1.supabase)
             .from('Organization')
             .update(updateData)
             .eq('id', Number(id))
@@ -108,7 +136,7 @@ exports.updateOrganization = updateOrganization;
 const deleteOrganization = async (req, res) => {
     const { id } = req.params;
     try {
-        const { error } = await supabase_1.supabase
+        const { error } = await (supabase_1.supabaseAdmin || supabase_1.supabase)
             .from('Organization')
             .delete()
             .eq('id', Number(id));

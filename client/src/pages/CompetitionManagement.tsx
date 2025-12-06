@@ -7,6 +7,7 @@ import TeamRegistrationModal from '../components/TeamRegistrationModal';
 import AthleteRosterModal from '../components/AthleteRosterModal';
 import { API_BASE_URL } from '../config/api';
 import { IOSCard, IOSButton, IOSSegmentedControl } from '../components/ui/IOSDesign';
+import { useDialog } from '../components/ui/IOSDialog';
 
 interface Competition {
     id: number;
@@ -28,6 +29,7 @@ interface Team {
         };
     };
     group?: {
+        id: number;
         name: string;
     };
 }
@@ -48,6 +50,7 @@ const CompetitionManagement: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const { token } = useAuth();
+    const { showConfirm, showAlert } = useDialog();
 
     const [competition, setCompetition] = useState<Competition | null>(null);
     const [teams, setTeams] = useState<Team[]>([]);
@@ -58,6 +61,7 @@ const CompetitionManagement: React.FC = () => {
     const [showRosterModal, setShowRosterModal] = useState(false);
     const [selectedTeamRegId, setSelectedTeamRegId] = useState<number | null>(null);
     const [deletingTeamId, setDeletingTeamId] = useState<number | null>(null);
+    const [fixtureKey, setFixtureKey] = useState(0);
 
     useEffect(() => {
         fetchCompetition();
@@ -108,7 +112,11 @@ const CompetitionManagement: React.FC = () => {
     };
 
     const handleDrawGroups = async (phaseId: number) => {
-        if (!confirm('Deseja sortear os times nos grupos? Esta ação não pode ser desfeita.')) {
+        const confirmed = await showConfirm(
+            'Sortear Times',
+            'Deseja sortear os times nos grupos? Esta ação não pode ser desfeita.'
+        );
+        if (!confirmed) {
             return;
         }
 
@@ -125,29 +133,42 @@ const CompetitionManagement: React.FC = () => {
 
             if (response.ok) {
                 const data = await response.json();
-                alert('Times sorteados com sucesso!');
+                await showAlert('Sucesso!', 'Times sorteados com sucesso!');
                 console.log('Distribution:', data.distribution);
                 fetchTeams(); // Refresh
             } else {
                 const error = await response.json();
-                alert(`Erro: ${error.error}`);
+                await showAlert('Erro', error.error);
             }
         } catch (error) {
             console.error(error);
-            alert('Erro ao sortear times');
+            await showAlert('Erro', 'Erro ao sortear times');
         } finally {
             setLoading(false);
         }
     };
 
     const handleGenerateFixture = async () => {
-        if (!confirm('Deseja gerar a tabela de jogos?')) {
+        console.log('🎮 handleGenerateFixture CALLED!');
+        console.log('🔑 Token:', token ? 'present' : 'MISSING');
+        console.log('🏆 Competition ID:', id);
+
+        const confirmResult = await showConfirm('Gerar Tabela', 'Deseja gerar a tabela de jogos?');
+        console.log('❓ Confirm result:', confirmResult);
+
+        if (!confirmResult) {
+            console.log('❌ User cancelled');
             return;
         }
 
         setLoading(true);
+        console.log('⏳ Loading set to true');
+
         try {
-            const response = await fetch(`${API_BASE_URL}/api/v1/competitions/${id}/fixture`, {
+            const url = `${API_BASE_URL}/api/v1/competitions/${id}/fixture`;
+            console.log('🌐 Fetching:', url);
+
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -159,23 +180,34 @@ const CompetitionManagement: React.FC = () => {
                 })
             });
 
+            console.log('📡 Response status:', response.status);
+            const data = await response.json();
+            console.log('📦 Response data:', data);
+
             if (response.ok) {
-                alert('Fixture gerado com sucesso!');
+                console.log('✅ SUCCESS!');
+                await showAlert('Sucesso!', 'Tabela de jogos gerada com sucesso!');
+                setFixtureKey(prev => prev + 1); // Force FixtureTable refresh
                 setActiveTab('fixture');
             } else {
-                const error = await response.json();
-                alert(`Erro: ${error.error}`);
+                console.log('❌ API ERROR:', data.error);
+                await showAlert('Erro', data.error);
             }
         } catch (error) {
-            console.error(error);
-            alert('Erro ao gerar fixture');
+            console.error('🔴 CATCH ERROR:', error);
+            await showAlert('Erro', 'Erro ao gerar tabela de jogos');
         } finally {
             setLoading(false);
+            console.log('⏳ Loading set to false');
         }
     };
 
     const handleDeleteTeam = async (teamRegId: number, teamName: string) => {
-        if (!confirm(`Deseja remover "${teamName}" da competição?`)) {
+        const confirmed = await showConfirm(
+            'Remover Time',
+            `Deseja remover "${teamName}" da competição?`
+        );
+        if (!confirmed) {
             return;
         }
 
@@ -201,11 +233,11 @@ const CompetitionManagement: React.FC = () => {
             } else {
                 const error = await response.json();
                 console.error('❌ [handleDeleteTeam] Error:', error);
-                alert(`Erro: ${error.error}`);
+                await showAlert('Erro', error.error);
             }
         } catch (error) {
             console.error('🔴 [handleDeleteTeam] Exception:', error);
-            alert('Erro ao remover time');
+            await showAlert('Erro', 'Erro ao remover time');
         } finally {
             setDeletingTeamId(null);
         }
@@ -318,7 +350,9 @@ const CompetitionManagement: React.FC = () => {
                                                         {teamName}
                                                     </div>
                                                     <div style={{ fontSize: '13px', color: '#8E8E93' }}>
-                                                        {team.group?.name ? `Grupo ${team.group.name}` : 'Aguardando sorteio'}
+                                                        {team.group?.name
+                                                            ? (team.group.name.startsWith('Grupo') ? team.group.name : `Grupo ${team.group.name}`)
+                                                            : 'Aguardando sorteio'}
                                                     </div>
                                                 </div>
                                             </div>
@@ -372,18 +406,52 @@ const CompetitionManagement: React.FC = () => {
                                     </IOSButton>
                                 </div>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '1rem' }}>
-                                    {phase.groups?.map(group => (
-                                        <div key={group.id} style={{
-                                            background: 'rgba(255, 255, 255, 0.05)',
-                                            borderRadius: '12px',
-                                            padding: '1.5rem',
-                                            textAlign: 'center',
-                                            border: '1px solid rgba(255, 255, 255, 0.1)'
-                                        }}>
-                                            <div style={{ fontSize: '18px', fontWeight: 700, marginBottom: '0.5rem' }}>{group.name}</div>
-                                            <div style={{ fontSize: '12px', color: '#8E8E93' }}>Grupo</div>
-                                        </div>
-                                    ))}
+                                    {phase.groups?.map(group => {
+                                        const groupTeams = teams.filter(t => t.group?.id === group.id);
+                                        return (
+                                            <div key={group.id} style={{
+                                                background: 'rgba(30, 30, 32, 0.6)',
+                                                borderRadius: '16px',
+                                                overflow: 'hidden',
+                                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                                display: 'flex', flexDirection: 'column'
+                                            }}>
+                                                <div style={{
+                                                    padding: '1rem',
+                                                    background: 'rgba(255,255,255,0.05)',
+                                                    borderBottom: '1px solid rgba(255,255,255,0.05)',
+                                                    textAlign: 'center'
+                                                }}>
+                                                    <div style={{ fontSize: '16px', fontWeight: 700 }}>{group.name}</div>
+                                                    <div style={{ fontSize: '11px', color: '#8E8E93' }}>{groupTeams.length} times</div>
+                                                </div>
+
+                                                <div style={{ padding: '0.5rem' }}>
+                                                    {groupTeams.length === 0 ? (
+                                                        <div style={{ padding: '1rem', textAlign: 'center', color: '#48484A', fontSize: '13px' }}>Vazio</div>
+                                                    ) : (
+                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                                            {groupTeams.map(t => (
+                                                                <div key={t.id} style={{
+                                                                    padding: '8px 12px',
+                                                                    fontSize: '14px',
+                                                                    background: 'rgba(255,255,255,0.03)',
+                                                                    borderRadius: '8px',
+                                                                    display: 'flex', alignItems: 'center', gap: '8px'
+                                                                }}>
+                                                                    <div style={{
+                                                                        width: '6px', height: '6px', borderRadius: '50%',
+                                                                        background: '#32D74B'
+                                                                    }} />
+                                                                    {t.team.organization.name_official}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             </IOSCard>
                         ))}
@@ -402,7 +470,7 @@ const CompetitionManagement: React.FC = () => {
                                 Gerar Tabela
                             </IOSButton>
                         </div>
-                        <FixtureTable />
+                        <FixtureTable key={fixtureKey} />
                     </IOSCard>
                 )}
             </div>

@@ -80,7 +80,11 @@ export const listCompetitions = async (req: Request, res: Response) => {
     console.log('🔵 [listCompetitions] Request received');
     try {
         console.log('🟢 [listCompetitions] Querying Supabase...');
-        const { data: competitions, error } = await supabase
+
+        // Use supabaseAdmin if available to bypass RLS
+        const client = supabaseAdmin || supabase;
+
+        const { data: competitions, error } = await client
             .from('Competition')
             .select('id, name, status, nickname, start_date, end_date, gender, modality:Modality(id, name)')
             .order('created_at', { ascending: false });
@@ -92,11 +96,35 @@ export const listCompetitions = async (req: Request, res: Response) => {
 
         console.log(`✅ [listCompetitions] Got ${competitions?.length || 0} competitions`);
 
-        // OTIMIZAÇÃO: Removido Promise.all que causava timeout de 10+ segundos
-        // Retornar counts = 0 por enquanto (pode adicionar counts otimizados depois)
-        const result = (competitions || []).map(comp => ({
-            ...comp,
-            _count: { registrations: 0, matches: 0 }
+        // Buscar contagens de registrations e matches para cada competição
+        const result = await Promise.all((competitions || []).map(async (comp) => {
+            try {
+                // Contar registrations
+                const { count: regCount } = await client
+                    .from('TeamRegistration')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('competition_id', comp.id);
+
+                // Contar matches
+                const { count: matchCount } = await client
+                    .from('GameMatch')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('competition_id', comp.id);
+
+                return {
+                    ...comp,
+                    _count: {
+                        registrations: regCount || 0,
+                        matches: matchCount || 0
+                    }
+                };
+            } catch (countError) {
+                console.error(`Error counting for comp ${comp.id}:`, countError);
+                return {
+                    ...comp,
+                    _count: { registrations: 0, matches: 0 }
+                };
+            }
         }));
 
         console.log('📤 [listCompetitions] Sending response...');
@@ -107,6 +135,7 @@ export const listCompetitions = async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Failed to list competitions' });
     }
 };
+
 
 export const getCompetition = async (req: Request, res: Response) => {
     const { id } = req.params;
@@ -162,8 +191,11 @@ export const deleteCompetition = async (req: Request, res: Response) => {
     console.log(`🗑️  [deleteCompetition] Deleting competition ID: ${id}`);
 
     try {
+        // Use supabaseAdmin to bypass RLS
+        const client = supabaseAdmin || supabase;
+
         // First check if competition exists
-        const { data: existing, error: checkError } = await supabase
+        const { data: existing, error: checkError } = await client
             .from('Competition')
             .select('id, name')
             .eq('id', Number(id))
@@ -177,7 +209,7 @@ export const deleteCompetition = async (req: Request, res: Response) => {
         console.log(`🔍 [deleteCompetition] Found competition: ${existing.name}`);
 
         // Delete the competition (cascade deletes will handle related records)
-        const { error: deleteError } = await supabase
+        const { error: deleteError } = await client
             .from('Competition')
             .delete()
             .eq('id', Number(id));
@@ -227,25 +259,56 @@ export const generateFixture = async (req: Request, res: Response) => {
             .from('Competition')
             .select(`
                 *,
-                registrations:TeamRegistration(team_id),
-                venues:CompetitionVenue(venue_id, priority)
+                registrations:TeamRegistration(team_id, group_id),
+                venues:CompetitionVenue(venue_id, priority),
+                phases:Phase(*, groups:Group(*))
             `)
             .eq('id', Number(id))
             .single();
 
         if (compError || !competition) throw new Error('Competition not found');
 
-        const teams = competition.registrations.map((r: any) => r.team_id);
-        if (teams.length < 2) return res.status(400).json({ error: 'Not enough teams to generate fixture' });
+        if (compError || !competition) throw new Error('Competition not found');
 
-        // 2. Generate Matches based on Type
+        // 2. Determine Match Generation Strategy
         let matches: ScheduledMatch[] = [];
 
-        if (competition.competition_type === 'ROUND_ROBIN') {
+        // Check if there are groups in the first phase
+        const groupPhase = competition.phases?.find((p: any) => p.type === 'GROUP' || p.groups?.length > 0);
+
+        if (groupPhase && groupPhase.groups?.length > 0) {
+            console.log('🗓️ [generateFixture] Generating matches for GROUP phase...');
+
+            // Loop through groups and generate Round Robin for each
+            for (const group of groupPhase.groups) {
+                // Filter teams belonging to this group
+                const groupTeams = competition.registrations
+                    .filter((r: any) => r.group_id === group.id)
+                    .map((r: any) => r.team_id);
+
+                if (groupTeams.length >= 2) {
+                    const groupMatches = generateRoundRobin(groupTeams);
+                    // Add group_id to matches
+                    groupMatches.forEach(m => {
+                        m.group_id = group.id;
+                        m.phase_id = groupPhase.id;
+                    });
+                    matches.push(...groupMatches);
+                } else {
+                    console.warn(`⚠️ Group ${group.name} has fewer than 2 teams. Skipping.`);
+                }
+            }
+        }
+        // Fallback to standard generation if no groups defined
+        else if (competition.competition_type === 'ROUND_ROBIN') {
+            const teams = competition.registrations.map((r: any) => r.team_id);
             matches = generateRoundRobin(teams);
         } else if (competition.competition_type === 'SINGLE_ELIMINATION') {
+            const teams = competition.registrations.map((r: any) => r.team_id);
             matches = generateElimination(teams);
         } else {
+            // Default fallback
+            const teams = competition.registrations.map((r: any) => r.team_id);
             matches = generateRoundRobin(teams);
         }
 
@@ -273,11 +336,21 @@ export const generateFixture = async (req: Request, res: Response) => {
             team_b_id: m.team_b_id,
             scheduled_date: m.scheduled_date ? m.scheduled_date.toISOString() : null,
             venue_id: m.venue_id,
-            status: 'SCHEDULED'
+            status: 'SCHEDULED',
+            group_id: m.group_id || null
         }));
 
-        const { error: insertError } = await supabase.from('GameMatch').insert(matchInserts);
-        if (insertError) throw insertError;
+        console.log('📝 [generateFixture] Inserting matches:', matchInserts.length);
+        console.log('📝 [generateFixture] First match:', matchInserts[0]);
+
+        const { data: insertedData, error: insertError } = await supabase.from('GameMatch').insert(matchInserts).select();
+
+        if (insertError) {
+            console.error('❌ [generateFixture] Insert error:', insertError);
+            throw insertError;
+        }
+
+        console.log('✅ [generateFixture] Inserted successfully:', insertedData?.length, 'matches');
 
         res.json({ message: 'Fixture generated successfully', matches: matchInserts });
 
@@ -452,11 +525,12 @@ export const drawGroups = async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Failed to draw groups: ' + error.message });
     }
 };
-
 export const getFixture = async (req: Request, res: Response) => {
     const { id } = req.params;
 
     try {
+        console.log(`Getting fixture for competition ${id}`);
+        // Use supabaseAdmin or supabase
         const { data: matches, error } = await supabase
             .from('GameMatch')
             .select(`
@@ -468,9 +542,14 @@ export const getFixture = async (req: Request, res: Response) => {
             `)
             .eq('competition_id', Number(id))
             .order('round_number', { ascending: true })
-            .order('match_number', { ascending: true });
+            .order('scheduled_date', { ascending: true });
 
-        if (error) throw error;
+        if (error) {
+            console.error('Supabase error getting fixture:', error);
+            throw error;
+        }
+
+        console.log(`Found ${matches?.length} matches`);
 
         // Group by rounds
         const rounds: Record<number, any[]> = {};

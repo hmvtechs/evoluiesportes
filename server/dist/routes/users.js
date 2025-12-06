@@ -21,4 +21,5 @@ router.patch('/admin/:id', authenticate_1.authenticate, (0, authorize_1.authoriz
 router.post('/admin/:id/obfuscate', authenticate_1.authenticate, (0, authorize_1.authorize)(['ADMIN']), userController_1.obfuscateUser);
 router.get('/admin/dashboard', authenticate_1.authenticate, (0, authorize_1.authorize)(['ADMIN']), userController_1.getAdminDashboard);
 router.get('/admin/users', authenticate_1.authenticate, (0, authorize_1.authorize)(['ADMIN']), userController_1.getUsers);
+router.delete('/admin/:id', authenticate_1.authenticate, (0, authorize_1.authorize)(['ADMIN']), userController_1.deleteUser);
 exports.default = router;

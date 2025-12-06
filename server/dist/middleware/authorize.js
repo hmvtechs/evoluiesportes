@@ -5,7 +5,7 @@ const authorize = (allowedRoles) => {
     return (req, res, next) => {
         const user = req.user;
         // Debug para entender o que está chegando
-        // console.log('Authorize Check:', { user, allowedRoles });
+        console.log('🔐 [authorize] Check:', { user, allowedRoles, path: req.path, method: req.method });
         if (!user) {
             return res.status(401).json({ error: 'Não autenticado' });
         }

@@ -48,14 +48,26 @@ const CompetitionList: React.FC = () => {
     };
 
     const handleDelete = async (competition: Competition) => {
+        // Debug URL
+        alert(`Debug DELETE URL: ${API_BASE_URL}/api/v1/competitions/${competition.id}`);
+
+        console.log('[DELETE] Iniciando exclusão de:', competition.name, 'ID:', competition.id);
+
         const confirmMessage = `Tem certeza que deseja excluir a competição "${competition.name}"?\n\nEsta ação não pode ser desfeita e irá remover todos os dados relacionados (fases, grupos, inscrições, partidas).`;
 
         if (!window.confirm(confirmMessage)) {
+            console.log('[DELETE] Usuário cancelou a exclusão');
             return;
         }
 
+        console.log('[DELETE] Usuário confirmou. Enviando requisição DELETE...');
+
         try {
-            const response = await fetch(`${API_BASE_URL}/api/v1/competitions/${competition.id}`, {
+            const url = `${API_BASE_URL}/api/v1/competitions/${competition.id}`;
+            console.log('[DELETE] URL:', url);
+            console.log('[DELETE] Token:', token ? 'Presente' : 'AUSENTE');
+
+            const response = await fetch(url, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -63,15 +75,25 @@ const CompetitionList: React.FC = () => {
                 }
             });
 
+            console.log('[DELETE] Response status:', response.status);
+            const responseText = await response.text();
+            console.log('[DELETE] Response body:', responseText);
+
             if (response.ok) {
                 setCompetitions(prev => prev.filter(c => c.id !== competition.id));
                 alert('Competição excluída com sucesso!');
             } else {
-                const error = await response.json();
-                alert(`Erro ao excluir: ${error.error || 'Erro desconhecido'}`);
+                let errorMsg = 'Erro desconhecido';
+                try {
+                    const error = JSON.parse(responseText);
+                    errorMsg = error.error || error.message || errorMsg;
+                } catch (e) {
+                    errorMsg = responseText || errorMsg;
+                }
+                alert(`Erro ao excluir: ${errorMsg}`);
             }
         } catch (error) {
-            console.error('Failed to delete competition', error);
+            console.error('[DELETE] Erro de rede:', error);
             alert('Erro ao excluir competição. Verifique sua conexão.');
         }
     };

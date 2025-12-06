@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.setup2FA = exports.validateRF = exports.login = void 0;
 const supabase_1 = require("../config/supabase");
+const cpfValidationService_1 = require("../services/cpfValidationService");
 /**
  * LOGIN - Autentica usando Supabase Auth
  */
@@ -20,9 +21,11 @@ const login = async (req, res) => {
                 .eq('cpf', cleanCpf)
                 .single();
             if (searchError || !userFound) {
+                console.log('❌ CPF não encontrado no banco de dados');
                 return res.status(401).json({ error: 'CPF não encontrado' });
             }
             emailToLogin = userFound.email;
+            console.log(`🔍 CPF resolvido para email: ${emailToLogin}`);
         }
         // Autenticar com Supabase
         const { data, error } = await supabase_1.supabase.auth.signInWithPassword({
@@ -51,10 +54,43 @@ const login = async (req, res) => {
 };
 exports.login = login;
 /**
- * VALIDATE RF (Mock)
+ * VALIDATE RF - Valida CPF usando serviço de validação
  */
 const validateRF = async (req, res) => {
-    res.json({ valid: true, name: 'TESTE VALIDADO', status: 'VALID' });
+    const { cpf } = req.body;
+    if (!cpf) {
+        return res.status(400).json({ error: 'CPF é obrigatório' });
+    }
+    try {
+        console.log('\n=== VALIDATING CPF ===');
+        const result = await cpfValidationService_1.cpfValidationService.validateCPF(cpf);
+        if (result.valid) {
+            return res.json({
+                valid: true,
+                status: result.status,
+                name: result.name,
+                birthDate: result.birthDate,
+                gender: result.gender,
+                situation: result.situation,
+            });
+        }
+        else {
+            return res.status(400).json({
+                valid: false,
+                status: result.status,
+                error: result.error || 'CPF validation service not available',
+                situation: result.situation,
+            });
+        }
+    }
+    catch (error) {
+        console.error('❌ Error validating CPF:', error);
+        return res.status(500).json({
+            valid: false,
+            status: 'ERROR',
+            error: 'Erro ao validar CPF. Tente novamente mais tarde.',
+        });
+    }
 };
 exports.validateRF = validateRF;
 /**

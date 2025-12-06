@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAdminDashboard = exports.getDashboard = exports.updateProfile = exports.obfuscateUser = exports.updateAdminUser = exports.searchUsers = exports.getUsers = exports.register = void 0;
+exports.deleteUser = exports.getAdminDashboard = exports.getDashboard = exports.updateProfile = exports.obfuscateUser = exports.updateAdminUser = exports.searchUsers = exports.getUsers = exports.register = void 0;
 const supabase_1 = require("../config/supabase");
 /**
  * PUBLIC REGISTRATION usando Supabase Auth (método correto)
@@ -17,19 +17,24 @@ const register = async (req, res) => {
             });
         }
         const cleanCpf = cpf.replace(/\D/g, '');
-        // Check if user already exists na tabela User
-        const { data: existingUsers, error: checkError } = await supabase_1.supabase
+        // COMMENTED OUT: This check requires admin permissions
+        // Supabase Auth will automatically reject duplicate emails
+        /*
+        const { data: existingUsers, error: checkError } = await supabase
             .from('User')
             .select('id')
             .or(`email.eq.${email},cpf.eq.${cleanCpf}`)
             .limit(1);
+
         if (checkError) {
             console.error('Error checking existing user:', checkError);
             return res.status(500).json({ error: 'Erro ao verificar usuário existente' });
         }
+
         if (existingUsers && existingUsers.length > 0) {
             return res.status(400).json({ error: 'Usuário já cadastrado com este email ou CPF' });
         }
+        */
         // Validate Role
         // Importar roles válidos
         const validRoles = ['ADMIN', 'STAFF', 'REFEREE', 'CLUB', 'ATHLETE', 'FAN'];
@@ -37,10 +42,16 @@ const register = async (req, res) => {
         // 1. Criar usuário no Supabase Auth (isso cria a senha na auth.users)
         const { data: authData, error: authError } = await supabase_1.supabase.auth.signUp({
             email: email,
-            password: password
+            password: password,
+            options: {
+                data: {
+                    role: assignedRole,
+                    full_name: full_name
+                }
+            }
         });
         if (authError) {
-            console.error('Error creating auth user:', authError);
+            console.error('Error creating auth user:', JSON.stringify(authError, null, 2));
             return res.status(500).json({ error: 'Erro ao criar conta: ' + authError.message });
         }
         if (!authData.user) {
@@ -336,3 +347,38 @@ const getAdminDashboard = async (req, res) => {
     }
 };
 exports.getAdminDashboard = getAdminDashboard;
+/**
+ * ADMIN: Delete user (Auth + Database)
+ */
+const deleteUser = async (req, res) => {
+    const { id } = req.params;
+    console.log(`\n=== DELETING USER: ${id} ===`);
+    try {
+        if (!supabase_1.supabaseAdmin) {
+            return res.status(500).json({ error: 'Supabase Admin not configured' });
+        }
+        // 1. Delete from Supabase Auth
+        const { error: authError } = await supabase_1.supabaseAdmin.auth.admin.deleteUser(id);
+        if (authError) {
+            console.error('❌ Error deleting auth user:', authError);
+            return res.status(500).json({ error: 'Erro ao apagar usuário do Auth' });
+        }
+        // 2. Delete from Database (User table)
+        // Ideally this should cascade, but we force it just in case
+        const { error: dbError } = await supabase_1.supabase
+            .from('User')
+            .delete()
+            .eq('id', id);
+        if (dbError) {
+            console.error('❌ Error deleting database user:', dbError);
+            // We don't return error here because Auth user is already gone
+        }
+        console.log('✅ User deleted successfully');
+        res.json({ message: 'Usuário removido com sucesso' });
+    }
+    catch (error) {
+        console.error('❌ Error deleting user:', error.message);
+        res.status(500).json({ error: 'Erro ao apagar usuário' });
+    }
+};
+exports.deleteUser = deleteUser;

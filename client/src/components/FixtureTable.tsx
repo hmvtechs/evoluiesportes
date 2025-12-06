@@ -32,14 +32,18 @@ const FixtureTable: React.FC = () => {
     }, [id]);
 
     const fetchFixture = async () => {
+        console.log('📊 [FixtureTable] Fetching fixture for competition:', id);
         try {
             const response = await fetch(`${API_BASE_URL}/api/v1/competitions/${id}/fixture`);
+            console.log('📊 [FixtureTable] Response status:', response.status);
             if (response.ok) {
                 const data = await response.json();
+                console.log('📊 [FixtureTable] Data received:', data);
+                console.log('📊 [FixtureTable] Rounds count:', data.rounds?.length);
                 setRounds(data.rounds || []);
             }
         } catch (error) {
-            console.error('Failed to fetch fixture', error);
+            console.error('📊 [FixtureTable] Failed to fetch fixture', error);
         } finally {
             setLoading(false);
         }

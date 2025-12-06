@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { DialogProvider } from './components/ui/IOSDialog';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Layout from './components/Layout';
@@ -29,37 +30,39 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+      <DialogProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
 
-          <Route path="/" element={
-            <ProtectedRoute>
-              <Layout />
-            </ProtectedRoute>
-          }>
-            <Route index element={<Dashboard />} />
-            <Route path="modules" element={<ModulesDashboard />} />
-            <Route path="competitions" element={<CompetitionList />} />
-            <Route path="competitions/new" element={<CompetitionWizard />} />
-            <Route path="competitions/:id/manage" element={<CompetitionManagement />} />
-            <Route path="matches" element={<MatchOperation />} />
-            <Route path="profile" element={<Profile />} />
-            <Route path="digital-id" element={<DigitalID />} />
-            <Route path="documents" element={<Documents />} />
-            <Route path="admin" element={<AdminDashboard />} />
-            <Route path="admin/users" element={<AdminUsers />} />
-            <Route path="admin/organizations" element={<AdminOrganizations />} />
-            {/* Venue & Booking Routes */}
-            <Route path="venues" element={<VenueList />} />
-            <Route path="venues/new" element={<VenueForm />} />
-            <Route path="venues/:id/edit" element={<VenueForm />} />
-            <Route path="venues/:id/book" element={<BookingCalendar />} />
-            <Route path="my-bookings" element={<MyBookings />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+            <Route path="/" element={
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            }>
+              <Route index element={<Dashboard />} />
+              <Route path="modules" element={<ModulesDashboard />} />
+              <Route path="competitions" element={<CompetitionList />} />
+              <Route path="competitions/new" element={<CompetitionWizard />} />
+              <Route path="competitions/:id/manage" element={<CompetitionManagement />} />
+              <Route path="matches" element={<MatchOperation />} />
+              <Route path="profile" element={<Profile />} />
+              <Route path="digital-id" element={<DigitalID />} />
+              <Route path="documents" element={<Documents />} />
+              <Route path="admin" element={<AdminDashboard />} />
+              <Route path="admin/users" element={<AdminUsers />} />
+              <Route path="admin/organizations" element={<AdminOrganizations />} />
+              {/* Venue & Booking Routes */}
+              <Route path="venues" element={<VenueList />} />
+              <Route path="venues/new" element={<VenueForm />} />
+              <Route path="venues/:id/edit" element={<VenueForm />} />
+              <Route path="venues/:id/book" element={<BookingCalendar />} />
+              <Route path="my-bookings" element={<MyBookings />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </DialogProvider>
     </AuthProvider>
   );
 }

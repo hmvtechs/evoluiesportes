@@ -97,7 +97,10 @@ const CompetitionWizard: React.FC = () => {
 
     const addGroup = (phaseIndex: number) => {
         const newPhases = [...formData.phases];
-        newPhases[phaseIndex].groups.push({ name: `Grupo ${newPhases[phaseIndex].groups.length + 1}` });
+        const currentGroupsCount = newPhases[phaseIndex].groups.length;
+        // Generate letter based on index: 0->A, 1->B, etc.
+        const letter = String.fromCharCode(65 + currentGroupsCount);
+        newPhases[phaseIndex].groups.push({ name: `Grupo ${letter}` });
         setFormData({ ...formData, phases: newPhases });
     };
 
